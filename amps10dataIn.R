@@ -108,37 +108,68 @@ newspapers_engagement_10 <- readRDS("newspapers_engagement_10.rds")
 # RADIO
 
 names_radio_10_4w <- electr_10_labels %>%
-        str_subset('ca64co\\d{2}_\\d') %>%
-        str_replace('.+listened.+4\\sweeks\\s-\\s','')
+        str_subset('Listened to this radio station in the past 4 weeks') %>%
+        str_replace('.+-','') %>%
+        str_trim()
 
-names_radio_10_4w <- names_radio_10_4w[-c(98,99)] # get rid of "unsure" and "none"
-
-names_radio_10_7 <- electr_10_labels %>%
-        str_subset('ca65co\\d{2}_\\d') %>%
-        str_replace('.+listened.+7\\sdays\\s-\\s','')
-names_radio_10_7 <- names_radio_10_7[-c(81, 87,88)] # get rid of "unsure" and "none" & empty one 
-
-names_radio_10_y <- electr_10_labels %>%
-        str_subset('ca66co\\d{2}_\\d') %>%
-        str_replace('.+listened\\sto\\syesterday\\s-\\s','')
-names_radio_10_y <- names_radio_10_y[-c(64,65)] # get rid of "unsure" and "none"
+names_radio_10_4w <- names_radio_10_4w[1:94] # get rid of "unsure" and "none" and summaries
 
 
-# # most radio stations in 4 weeks, so use that to create names list
-# names_radio_10 <- names_radio_10_4w
+# most radio stations in 4 weeks, so use that to create names list
+names_radio_10 <- names_radio_10_4w
+
+# check_radio <- readRDS("names_radio_12_copy.rds")
 # fix(names_radio_10)
-saveRDS(names_radio_10, "names_radio_10.rds")
+# 
+# saveRDS(names_radio_10, "names_radio_10.rds")
 names_radio_10 <- readRDS('names_radio_10.rds')
 
+names_radio_10_7 <- electr_10_labels %>%
+        str_subset('Listened to this radio station in the past 7 days') %>%
+        str_replace('.+-','') %>%
+        str_trim()
+
+names_radio_10_7 <- names_radio_10_7[1:83] # get rid of "unsure" and "none" and summaries
+names_radio_10_7 <- names_radio_10[c(1:41, 43:46, 48:65,67:69,71:73,77:87,89:92)]
+
+names_radio_10_y <- electr_10_labels %>%
+        str_subset('Listened to this radio station yesterday') %>%
+        str_replace('.+-','') %>%
+        str_trim()
+
+names_radio_10_y <- names_radio_10_y[2:67] # get rid of "unsure" and "none" and summaries
+names_radio_10_y <- names_radio_10_7[c(1:18,20:34,36,39:43,45:55,57:59,61:63,65:66,70:74,77:78,84)] 
+
 # get data...
-radio4weeks_10 <- electr_10[,str_detect(names(electr_10), 'ca64co\\d{2}_\\d')]
-radio4weeks_10 <- radio4weeks_10[,-c(98,99)] # get rid of "unsure" and "none"
+# 4 weeks:
+colnames_4weeks <- electr_10_labels %>%
+        str_subset('Listened to this radio station in the past 4 weeks') %>%
+        str_replace('Listened.+','') %>%
+        str_trim()
+colnames_4weeks <- colnames_4weeks[1:94]
+radio4weeks_10 <- electr_10[,names(electr_10) %in% colnames_4weeks]
+names(radio4weeks_10) <- names_radio_10
 
-radio7days_10 <- electr_10[,str_detect(names(electr_10), 'ca65co\\d{2}_\\d')]
-radio7days_10 <- radio7days_10[,-c(81, 87,88)]  # get rid of "unsure" and "none" & empty one 
+# 7 days
+colnames_7days <- electr_10_labels %>%
+        str_subset('Listened to this radio station in the past 7 days') %>%
+        str_replace('Listened.+','') %>%
+        str_trim()
+colnames_7days <- colnames_7days[1:83]
+radio7days_10 <- electr_10[,names(electr_10) %in% colnames_7days]
+names(radio7days_10) <- names_radio_10_7
 
-radioYesterday_10 <- electr_10[,str_detect(names(electr_10), 'ca66co\\d{2}_\\d')]
-radioYesterday_10 <- radioYesterday_10[,-c(64,65)]  # get rid of "unsure" and "none"
+# yesterday
+colnames_yesterday <- electr_10_labels %>%
+        str_subset('Listened to this radio station yesterday') %>%
+        str_replace('Listened.+','') %>%
+        str_trim()
+colnames_yesterday <- colnames_yesterday[2:67]
+radioYesterday_10 <- electr_10[,names(electr_10) %in% colnames_yesterday]
+
+
+
+
 
 # identifying missing stations by changing all to "64"
 a <- names(radio4weeks_10)
