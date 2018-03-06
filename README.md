@@ -1,2 +1,2 @@
 # amps_2010
-Code to process amps 20120 data for my MSc Thesis
+Code to process amps 2010 data for my MSc Thesis
