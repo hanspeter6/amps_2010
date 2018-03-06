@@ -32,16 +32,20 @@ load("labels_10.RData")
 
 ## 1st Print (newspapers and magazines) Media Set
 
-# names_print_10 <- str_subset(print_10_labels, 'Number of different issues usually read or page through') %>%
-#         str_replace('.+\\s-', '')
+names_print_10 <- str_subset(print_10_labels, 'Number of different issues usually read or page through') %>%
+        str_replace('.+\\s-', '') %>%
+        str_trim()
 
-saveRDS(names_print_10, "names_print_10.rds")
+# check_12 <- readRDS("names_print_12_copy.rds")
+# 
+# fix(names_print_10)
+# saveRDS(names_print_10, "names_print_10.rds")
 
 names_print_10 <- readRDS("names_print_10.rds")
 
-names_dailies_10 <- names_print_10[1:22]
-names_biweeklies_10 <- names_print_10[23]
-names_weeklies_10 <- names_print_10[24:52]
+# names_dailies_10 <- names_print_10[1:22]
+# names_biweeklies_10 <- names_print_10[23]
+# names_weeklies_10 <- names_print_10[24:52]
 
 # # NBNB: Not community papers in 2010...
 # names_community_cape_town <- names_print[40:51]
@@ -51,22 +55,21 @@ names_weeklies_10 <- names_print_10[24:52]
 # names_community_Jhb <- names_print[69]
 # names_community_ERand <- names_print[70:71]
 # names_community_KZn <- names_print[72:74]
-
-names_mags_weekly_10 <- names_print_10[53:65]
-names_fortnightly_mags_10 <- names_print_10[66:67]
-names_monthly_news_10 <- names_print_10[68:69]
-names_monthly_mags_10 <- names_print_10[70:147]
-
-names_alt_monthly_10 <- names_print_10[150:161]
-names_quarterly_mags_10 <- names_print_10[164:168]
-
-names_monthly_store_mags_10 <- names_print_10[148:149]
-names_alt_month_store_mags_10 <- names_print_10[162:163]
-names_quarterly_store_mags_10 <- names_print_10[169:172]
+# 
+# names_mags_weekly_10 <- names_print_10[53:65]
+# names_fortnightly_mags_10 <- names_print_10[66:67]
+# names_monthly_news_10 <- names_print_10[68:69]
+# names_monthly_mags_10 <- names_print_10[70:147]
+# 
+# names_alt_monthly_10 <- names_print_10[150:161]
+# names_quarterly_mags_10 <- names_print_10[164:168]
+# 
+# names_monthly_store_mags_10 <- names_print_10[148:149]
+# names_alt_month_store_mags_10 <- names_print_10[162:163]
+# names_quarterly_store_mags_10 <- names_print_10[169:172]
 
 # create print dataset:
 issues_10 <- print_10[,str_detect(names(print_10), 'ca[345678]co\\d{2}')]
-issues_10 <- issues_10[,-which(names(issues_10) == "ca6co40")] # get rid of one variable name = '0'. All NAs
 names(issues_10) <- names_print_10
 
 
@@ -92,8 +95,8 @@ saveRDS(print_engagement_10, "print_engagement_10.rds")
 
 print_engagement_10 <- readRDS("print_engagement_10.rds")
 
-newspapers_engagement_10 <- print_engagement_10[,c(1:52,68,69)]
-magazines_engagement_10 <- print_engagement_10[,c(53:67,70:172)]
+newspapers_engagement_10 <- print_engagement_10[,1:50]
+magazines_engagement_10 <- print_engagement_10[,51:167]
 
 saveRDS(newspapers_engagement_10, "newspapers_engagement_10.rds")
 saveRDS(magazines_engagement_10, "magazines_engagement_10.rds")
@@ -107,6 +110,7 @@ newspapers_engagement_10 <- readRDS("newspapers_engagement_10.rds")
 names_radio_10_4w <- electr_10_labels %>%
         str_subset('ca64co\\d{2}_\\d') %>%
         str_replace('.+listened.+4\\sweeks\\s-\\s','')
+
 names_radio_10_4w <- names_radio_10_4w[-c(98,99)] # get rid of "unsure" and "none"
 
 names_radio_10_7 <- electr_10_labels %>%
