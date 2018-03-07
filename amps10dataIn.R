@@ -186,63 +186,147 @@ radio_engagement_10 <- readRDS("radio_engagement_10.rds")
 
 
 ## TV
-names_tv_10 <- electr_10_labels %>%
-        str_subset('Watched.+4\\sweeks') %>%
-        str_replace('.+Watched\\s','') %>%
-        str_replace('in\\sthe\\sPAST\\s4\\sWEEKS','') %>%
-        str_trim()
 
-saveRDS(names_tv_10, "names_tv_10.rds")
-names_tv_10 <- readRDS("names_tv_10.rds")
+# check with 2012 names:
+check_tv_names_12 <- readRDS("names_tv_12.rds")
+# names_tv_10 <- electr_10_labels %>%
+#         str_subset('Watched.+4\\sweeks') %>%
+#         str_replace('.+Watched\\s','') %>%
+#         str_replace('in\\sthe\\sPAST\\s4\\sWEEKS','') %>%
+#         str_trim()
+# 
+# saveRDS(names_tv_10, "names_tv_10.rds")
+# names_tv_10 <- readRDS("names_tv_10.rds")
 
-# want to isolate only past 4 weeks and get rid of ("UNSURE", and "no TV")
-tv4weeks_10 <- electr_10[,c('ca45co30_1',
-                            'ca45co30_2',
-                            'ca45co30_3',
-                            'ca45co30_4',
-                            'ca45co30_5',
-                            'ca45co30_6',
-                            'ca45co30_7',
-                            'ca45co30_8',
-                            'ca45co30_9',
-                            'ca45co31_0',
-                            'ca45co72_3',
-                            'ca45co72_8'
+# want to isolate only past 4 weeks (no DSTV yet)
+tv4weeks_10 <- electr_10[,c('ca50co11_9', # "e TV"
+                            'ca50co13_7', # "MNet Main" 
+                            'ca50co13_9', # "MNet Community"
+                            'ca50co15_7', # "SABC 1"
+                            'ca50co15_8', # "SABC 2"
+                            'ca50co15_9', # "SABC 3"
+                            'ca50co24_2', # "Cape Town TV" 
+                            'ca50co16_2' # "Soweto TV"
                             )] 
 
-# want to isolate only past 7 days...
-tv7days_10 <- electr_10[,c('ca45co32_1',
-                           'ca45co32_2',
-                           'ca45co32_3',
-                           'ca45co32_4',
-                           'ca45co32_5',
-                           'ca45co32_6',
-                           'ca45co32_7',
-                           'ca45co32_8',
-                           'ca45co32_9',
-                           'ca45co33_0',
-                           'ca45co74_3',
-                           'ca45co74_8'
+# want to isolate only past 7 days...(no DSTV yet)
+tv7days_10 <- electr_10[,c('ca50co31_9', # "e TV"
+                           'ca50co33_7', # "MNet Main" 
+                           'ca50co33_9', # "MNet Community"
+                           'ca50co35_7', # "SABC 1"
+                           'ca50co35_8', # "SABC 2"
+                           'ca50co35_9', # "SABC 3"
+                           'ca50co44_2', # "Cape Town TV" 
+                           'ca50co36_2' # "Soweto TV"
                            )] 
 
-# want to isolate only yesterday...(indexes w.r.t 4weeks that are missing here: 7, 10)
-tvYesterday_10 <- electr_10[,c('ca45co34_1',
-                               'ca45co34_2',
-                               'ca45co34_3',
-                               'ca45co34_4',
-                               'ca45co34_5',
-                               'ca45co34_6',
-                               'ca45co34_8',
-                               'ca45co34_9',
-                               'ca45co76_3',
-                               'ca45co76_8'
+# want to isolate only yesterday...(no DSTV yet)
+tvYesterday_10 <- electr_10[,c('ca50co51_9', # "e TV"
+                               'ca50co53_7', # "MNet Main" 
+                               'ca50co53_9', # "MNet Community"
+                               'ca50co55_7', # "SABC 1"
+                               'ca50co55_8', # "SABC 2"
+                               'ca50co55_9', # "SABC 3"
+                               'ca50co64_2', # "Cape Town TV" 
+                               'ca50co56_2' # "Soweto TV"
                                )]
 
-# combining into a tv engagement dataset (using tv4weeks_10 as basis):
 
-tv_engagement_10 <- tv4weeks_10 + tv7days_10
-tv_engagement_10[,-c(7,10)] <- tv_engagement_10[,-c(7,10)] + tvYesterday_10
-names(tv_engagement_10) <- names_tv_10
+# dealing with complicated DSTV issue:
+# will identify list of variables for each time period that will serve as
+# proxy or indication of dstv viewing for each period.
+
+# 4 weeks:
+dstv_10_4w <- electr_10[,c('ca50co09_1', # Africa Magic
+                'ca50co10_6', # Cartoon Network
+                'ca50co11_0', # Channel O
+                'ca50co11_6', # Discovery Channel
+                'ca50co12_3', # ESPN
+                'ca50co12_6', # Fashion TV
+                'ca50co12_7', # History Channel
+                'ca50co13_3', # KykNET
+                'ca50co14_0', # Mnet Movies 1
+                'ca50co14_1', # Mnet Movies 2
+                'ca50co14_4', # MTV
+                'ca50co14_7', #National Geographic Channel
+                'ca50co14_9', # News24
+                'ca50co16_0', # Sony Entertainment Television
+                'ca50co16_5', # Supersports1
+                'ca50co16_6', # Supersports2
+                'ca50co16_7', # Supersports3
+                'ca50co16_8', # Supersports4
+                'ca50co17_5' # Travel Channel
+                )]
+# create single vector:
+
+dstv_10_4w_vec <- rowSums(dstv_10_4w)
+dstv_10_4w_vec <- ifelse(dstv_10_4w_vec != 0, 1, 0)
+
+# 7 days:
+dstv_10_7d <- electr_10[,c('ca50co29_1', # Africa Magic
+                'ca50co30_6', # Cartoon Network
+                'ca50co31_0', # Channel O
+                'ca50co31_6', # Discovery Channel
+                'ca50co32_3', # ESPN
+                'ca50co32_6', # Fashion TV
+                'ca50co32_7', # History Channel
+                'ca50co33_3', # KykNET
+                'ca50co34_0', # Mnet Movies 1
+                'ca50co34_1', # Mnet Movies 2
+                'ca50co34_4', # MTV
+                'ca50co34_7', # National Geographic Channel
+                'ca50co34_9', # News24
+                'ca50co36_0', # Sony Entertainment Television
+                'ca50co36_5', # Supersports1
+                'ca50co36_6', # Supersports2
+                'ca50co36_7', # Supersports3
+                'ca50co36_8', # Supersports4
+                'ca50co37_5' # Travel Channel
+                )]
+dstv_10_7d_vec <- rowSums(dstv_10_7d)
+dstv_10_7d_vec <- ifelse(dstv_10_7d_vec != 0, 1, 0)
+
+# yesterday:
+dstv_10_y <- electr_10[,c('ca50co49_1', # Africa Magic
+                'ca50co50_6', # Cartoon Network
+                'ca50co51_0', # Channel O
+                'ca50co51_6', # Discovery Channel
+                'ca50co52_3', # ESPN
+                'ca50co52_6', # Fashion TV
+                'ca50co52_7', # History Channel
+                'ca50co53_3', # KykNET
+                'ca50co54_0', # Mnet Movies 1
+                'ca50co54_1', # Mnet Movies 2
+                'ca50co54_4', # MTV
+                'ca50co54_7', # National Geographic Channel
+                'ca50co54_9', # News24
+                'ca50co56_0', # Sony Entertainment Television
+                'ca50co56_5', # Supersports1
+                'ca50co56_6', # Supersports2
+                'ca50co56_7', # Supersports3
+                'ca50co56_8', # Supersports4
+                'ca50co57_5' # Travel Channel
+                )]
+dstv_10_y_vec <- rowSums(dstv_10_y)
+dstv_10_y_vec <- ifelse(dstv_10_y_vec != 0, 1, 0)
+
+dstv_10 <- dstv_10_4w_vec + dstv_10_7d_vec + dstv_10_y_vec
+
+# combining into a tv engagement dataset first not including dstv:
+tv_engagement_10 <- tv4weeks_10 + tv7days_10 + tvYesterday_10
+
+tv_engagement_10 <- tv_engagement_10 %>%
+        mutate(DSTV = dstv_10)
+
+names(tv_engagement_10) <- c("e TV",
+                             "MNet Main",
+                             "MNet Community",
+                             "SABC 1",
+                             "SABC 2",
+                             "SABC 3",
+                             "Cape Town TV",
+                             "Soweto TV",
+                             "DSTV")
 
 saveRDS(tv_engagement_10, "tv_engagement_10.rds")
 
@@ -250,43 +334,25 @@ tv_engagement_10 <- readRDS("tv_engagement_10.rds")
 
 ## 3rd Internet Media Set
 
-## accessed: sum of 10 months, 4weeks, 7days and yesterday
-internet_level1 <- internet_10[,str_detect(names(internet_10), 'ca49co(45)|(46)|(47)|(48)')]
+## accessed: sum of 12 months, 4weeks, 7days and yesterday
+internet_level1 <- internet_10[,str_detect(names(internet_10), 'ca47co(41)|(42)|(43)|(44)')]
 
 #change all 2 = "No" and NA's' to 0
-for(i in 1: nrow(internet_level1)) {
-        for(j in 1: ncol(internet_level1)) {
-                if(is.na(internet_level1[i,j]) | internet_level1[i,j] == 2){
-                        internet_level1[i,j] <- 0
-                }
-        }
-}
+internet_level1 <- data.frame(ifelse(is.na(internet_level1) | internet_level1 == 2, 0, 1))
 
 internet_level1 <- rowSums(internet_level1)
 
 # what internet was accessed for...
 ##  (maybe could use similar to vehicles?? as well as add up and multiply with first eng):
 
-internet_level2 <- internet_10[,str_detect(names(internet_10), 'ca49co(55)|(58)|(63)|(64)|(69)|(71)')]
-
-# change NA and 3 = 0; 1,2,4 = 1
-for(i in 1: nrow(internet_level2)) {
-        for(j in 1: ncol(internet_level2)) {
-                if(is.na(internet_level2[i,j]) | internet_level2[i,j] == 3){
-                        internet_level2[i,j] <- 0
-                }
-                else {
-                        internet_level2[i,j] <- 1
-                }
-        }
-}
+internet_level2 <- internet_10[,str_detect(names(internet_10), 'ca47co(50_1)|(50_6)|(51_6)|(51_7)|(51_8)|(51_9)')]
 
 names(internet_level2) <- c('int_search',
                           'int_social',
-                          'int_print',
-                          'int_news',
+                          'int_radio',
                           'int_tv',
-                          'int_radio')
+                          'int_print',
+                          'int_news')
 
 ## create single dataframe for internet multiplying internet_level1 with sum of internet_level2:
 internet_engagement_10 <- internet_level2  * internet_level1
@@ -322,6 +388,8 @@ saveRDS(media_type_10, 'media_type_10.rds')
 saveRDS(media_vehicles_10, 'media_vehicles_10.rds')
 
 ## 4th Demographics Set (see notes for descriptions)
+
+
 
 age <- personal_10[,'ca56co34']
 sex <- demogrs_10[,'ca91co51a']
