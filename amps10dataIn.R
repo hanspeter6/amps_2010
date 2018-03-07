@@ -130,7 +130,7 @@ names_radio_10_7 <- electr_10_labels %>%
         str_trim()
 
 names_radio_10_7 <- names_radio_10_7[1:83] # get rid of "unsure" and "none" and summaries
-names_radio_10_7 <- names_radio_10[c(1:41, 43:46, 48:65,67:69,71:73,77:87,89:92)]
+
 
 names_radio_10_y <- electr_10_labels %>%
         str_subset('Listened to this radio station yesterday') %>%
@@ -138,7 +138,6 @@ names_radio_10_y <- electr_10_labels %>%
         str_trim()
 
 names_radio_10_y <- names_radio_10_y[2:67] # get rid of "unsure" and "none" and summaries
-names_radio_10_y <- names_radio_10_7[c(1:18,20:34,36,39:43,45:55,57:59,61:63,65:66,70:74,77:78,84)] 
 
 # get data...
 # 4 weeks:
@@ -148,7 +147,6 @@ colnames_4weeks <- electr_10_labels %>%
         str_trim()
 colnames_4weeks <- colnames_4weeks[1:94]
 radio4weeks_10 <- electr_10[,names(electr_10) %in% colnames_4weeks]
-names(radio4weeks_10) <- names_radio_10
 
 # 7 days
 colnames_7days <- electr_10_labels %>%
@@ -157,7 +155,6 @@ colnames_7days <- electr_10_labels %>%
         str_trim()
 colnames_7days <- colnames_7days[1:83]
 radio7days_10 <- electr_10[,names(electr_10) %in% colnames_7days]
-names(radio7days_10) <- names_radio_10_7
 
 # yesterday
 colnames_yesterday <- electr_10_labels %>%
@@ -167,39 +164,30 @@ colnames_yesterday <- electr_10_labels %>%
 colnames_yesterday <- colnames_yesterday[2:67]
 radioYesterday_10 <- electr_10[,names(electr_10) %in% colnames_yesterday]
 
+# want to create two sparser sets for 7 days & yesterday to add up with 4week set
 
+length(names_radio_10_4w[which(!names_radio_10_4w %in% names_radio_10_7)])
+length(names_radio_10_4w[which(!names_radio_10_4w %in% names_radio_10_y)])
 
+ind_7 <- c(38, 42, 47, 66, 70, 74, 75, 76, 88, 93, 94)
+ind_y <- c(19, 35, 37, 38, 42, 45, 47, 58, 62, 66, 67, 70, 71, 72, 73, 74, 75, 76, 82, 83, 86, 87, 88, 89, 90, 91, 93, 94)
 
+mat_7 <- data.frame(matrix(0, nrow = 25160, ncol = 94))
+mat_y <- data.frame(matrix(0, nrow = 25160, ncol = 94))
 
-# identifying missing stations by changing all to "64"
-a <- names(radio4weeks_10)
-b <- names(radio7days_10)
-c <- names(radioYesterday_10)
-b_adj <- b %>%
-        str_replace("65", "64")
-c_adj <- c %>%
-        str_replace("66", "64")
-
-names(radio7days_10) <- b_adj
-names(radioYesterday_10) <- c_adj
-
-ind_7 <- which(names(radio4weeks_10) %in% names(radio7days_10))
-ind_y <- which(names(radio4weeks_10) %in% names(radioYesterday_10))
-
-# adding up
-radio4weeks_10[,ind_7] <- radio4weeks_10[,ind_7] + radio7days_10
-radio4weeks_10[,ind_y] <- radio4weeks_10[,ind_y] + radioYesterday_10
-
-# creating engagement set:
-radio_engagement_10 <- radio4weeks_10
+mat_7[,-ind_7] <- radio7days_10
+mat_y[,-ind_y] <- radioYesterday_10
+        
+radio_engagement_10 <- radio4weeks_10 + mat_7 + mat_y
 names(radio_engagement_10) <- names_radio_10
 
 saveRDS(radio_engagement_10, "radio_engagement_10.rds")
 radio_engagement_10 <- readRDS("radio_engagement_10.rds")
 
-## TV (this year, included specific dstv and toptv channels (will include them))
+
+## TV
 names_tv_10 <- electr_10_labels %>%
-        str_subset('Watched.+4\\sWEEKS') %>%
+        str_subset('Watched.+4\\sweeks') %>%
         str_replace('.+Watched\\s','') %>%
         str_replace('in\\sthe\\sPAST\\s4\\sWEEKS','') %>%
         str_trim()
