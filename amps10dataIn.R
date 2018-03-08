@@ -387,11 +387,14 @@ media_vehicles_10 <- data.frame(cbind(qn = print_10$qn,
 saveRDS(media_type_10, 'media_type_10.rds')
 saveRDS(media_vehicles_10, 'media_vehicles_10.rds')
 
+media_type_10 <- readRDS("media_type_10.rds")
+media_vehicles_10 <- readRDS("media_vehicles_10.rds")
+
 ## 4th Demographics Set (see notes for descriptions)
 
 
 
-age <- personal_10[,'ca56co34']
+age <- personal_10[,'ca56co34'] -1 # for some reason 2-9 vs 1-8 elsewhere (double check this)
 sex <- demogrs_10[,'ca91co51a']
 edu <- demogrs_10[,'ca91co48']
 for(i in 1: length(edu)) {
@@ -405,48 +408,70 @@ for(i in 1: length(edu)) {
 hh_inc <- demogrs_10[,'ca91co50']
 race <- demogrs_10[,'ca91co51b']
 province <- demogrs_10[,'ca91co56']
-metro1 <- demogrs_10[,'ca91co57']
-metro2 <- demogrs_10[,'ca91co58'] + 9
-metro <- rowSums(cbind(metro1,
+
+
+metro1 <- demogrs_10[,'ca91co57'] # NB... reconsider all to greater jhb..ie including soweto..
+metro2 <- demogrs_10[,'ca91co58'] 
+metro <- rowSums(cbind(metro1, # NB...use the combination to determine non metropolitan respondents
                        metro2), na.rm = TRUE)
-#as in '95 need to sort out double count of Soweto....
-# seems that all the 19s are the sum of 7 & 10s (ie, Soweto)
-# # code as such, ie all 19s are actually 10s (this also eliminates double count in the 7s ( so exlude Soweto)) >NB double check this is same in '95!!!
-metro <- ifelse(metro == 19, 10, metro)
+
+# collect and code into single metro set:
+#0 = no metro
+#1 Cape Town
+#2 Cape Town Fringe Area
+#3 Port Elizabeth/Uitenhage
+#4 East London
+#5 Durban
+#6 Bloemfontein
+#7 Greater Johannesburg
+#8 Reef
+#9 Pretoria
+#10 Kimberley
+##11 Pietermaritzburg
+##12 Vaal
+##13 Welkom
+
+metro <- ifelse(metro == 7 | metro == 19, 7, metro) # Soweto back into greater jhb
+metro <- ifelse(metro %in% c(8,23,24), 8,metro)
+metro <- ifelse(metro %in% c(13), 12,metro)
+metro <- ifelse(metro %in% c(14), 13,metro)
+
 lang <- demogrs_10[,'ca91co75'] + 1 # change 0 to 1, so add one to all
 lifestages <- demogrs_10[,'ca91co77']
 mar_status <- personal_10[,'ca56co09']
-pers_inc1 <- personal_10[,'ca57co61']
-pers_inc2 <- personal_10[,'ca57co62'] + 10
-pers_inc3 <- personal_10[,'ca57co63'] + 20
-pers_inc4 <- personal_10[,'ca57co64'] + 30
-for(i in 1: length(pers_inc4)) {
-        if(!is.na(pers_inc4[i])) {
-                if(pers_inc4[i] == 31) {
-                        pers_inc4[i] <- 0
-                }
-                if(pers_inc4[i] == 32) {
-                        pers_inc4[i] <- 60
-                }
-        }
-}
-pers_inc <- rowSums(cbind(pers_inc1,
-                          pers_inc2,
-                          pers_inc3,
-                          pers_inc4), na.rm = TRUE)
+# pers_inc1 <- personal_10[,'ca57co61']
+# pers_inc2 <- personal_10[,'ca57co62'] + 10
+# pers_inc3 <- personal_10[,'ca57co63'] + 20
+# pers_inc4 <- personal_10[,'ca57co64'] + 30
+# for(i in 1: length(pers_inc4)) {
+#         if(!is.na(pers_inc4[i])) {
+#                 if(pers_inc4[i] == 31) {
+#                         pers_inc4[i] <- 0
+#                 }
+#                 if(pers_inc4[i] == 32) {
+#                         pers_inc4[i] <- 60
+#                 }
+#         }
+# }
+# pers_inc <- rowSums(cbind(pers_inc1,
+#                           pers_inc2,
+#                           pers_inc3,
+#                           pers_inc4), na.rm = TRUE)
 lsm <- lsm_10[,'ca91co64']
 lsm <- ifelse(lsm == 0,10,lsm)
 
 lifestyle <- lsm_10[,'ca58co39'] + 1 # to get rid of zero
 
-attitudesA <- lsm_10[,'ca67co10'] + 1 # to get rid of zeros
-attitudesB <- lsm_10[,'ca67co10_lsm']
+attitudesA <- lsm_10[,'ca76co10'] + 1 # to get rid of zeros
+attitudesB <- lsm_10[,'ca76co10_lsm']
+
+
 attitudesA <- ifelse(is.na(attitudesA), 0, attitudesA)
 attitudesB <- ifelse(is.na(attitudesB), 0, attitudesB)
 attitudes <- attitudesA + attitudesB
-attitudes <- ifelse(attitudes == 8, 4, attitudes)
+attitudes <- ifelse(attitudes == 12, 4, attitudes) # distants rooted
 attitudes <- ifelse(attitudes == 5 | attitudes == 6, attitudes + 1, attitudes)
-attitudes <- ifelse(attitudes == 9, 5, attitudes)
+attitudes <- ifelse(attitudes == 13, 5, attitudes)
 table(attitudes) # check
 
 
@@ -462,7 +487,7 @@ demographics_10 <- data.frame(qn = print_10$qn,
                               lang,
                               lifestages,
                               mar_status,
-                              pers_inc,
+                              # pers_inc,
                               lsm,
                               lifestyle,
                               attitudes)
