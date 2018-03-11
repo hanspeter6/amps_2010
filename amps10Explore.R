@@ -19,13 +19,19 @@ library(gridExtra)
 
 # read datafiles
 magazines_engagement_10 <- readRDS("magazines_engagement_10.rds")
+magazines_engagement_10_simple <- readRDS("magazines_engagement_10_simple.rds")
 newspapers_engagement_10 <- readRDS("newspapers_engagement_10.rds")
+newspapers_engagement_10_simple <- readRDS("newspapers_engagement_10_simple.rds")
 radio_engagement_10 <- readRDS("radio_engagement_10.rds")
 tv_engagement_10 <- readRDS("tv_engagement_10.rds")
 internet_engagement_10 <- readRDS("internet_engagement_10.rds")
+internet_engagement_10_simple <- readRDS("internet_engagement_10_simple.rds")
 
 media_type_10 <- readRDS("media_type_10.rds")
+media_type_10_simple <- readRDS("media_type_10_simple.rds")
 media_vehicles_10 <- readRDS("media_vehicles_10.rds")
+media_vehicles_10_simple <- readRDS("media_vehicles_10_simple.rds")
+
 
 demographics_10 <- readRDS("demographics_10.rds")
 
@@ -79,6 +85,11 @@ set10 <- demographics_10 %>%
         left_join(media_vehicles_10) %>%
         filter(metro != 0)
 
+set10_simple <- demographics_10 %>%
+        left_join(media_type_10_simple) %>%
+        left_join(media_vehicles_10_simple) %>%
+        filter(metro != 0)
+
 # consider some correlations
 
 png('corTypePlot2010.png')
@@ -117,15 +128,42 @@ set.seed(56)
 kmeans10 <- kmeans(set10[,c("newspapers","magazines","radio", "tv", "internet")],
                    centers = 5,
                    nstart = 20)
+set.seed(56)
+kmeans10_simple <- kmeans(set10_simple[,c("newspapers","magazines","radio", "tv", "internet")],
+                   centers = 5,
+                   nstart = 20,
+                   iter.max = 20)
+
 table(kmeans10$cluster) #
 
 # add cluster labels to the dataset
 set10 <- set10 %>%
         mutate(cluster = factor(kmeans10$cluster))
+set10_simpole <- set10_simple %>%
+        mutate(cluster = factor(kmeans10_simple$cluster))
+
+
+
+# trying out idea of first pc scores as measure of media type mix...kinda engagement...think about this
+
+pc_type <- princomp(set10[,c('newspapers', 'magazines', 'tv', 'radio', 'internet')])
+screeplot(pc_type, type = "lines")
+
+set10 <- set10 %>%
+        mutate(typePC = scale(pc_type$scores[,1]))
+
+pc_type_simple <- princomp(set10_simple[,c('newspapers', 'magazines', 'tv', 'radio', 'internet')])
+screeplot(pc_type_simple, type = "lines")
+
+set10_simple <- set10_simple %>%
+        mutate(typePC = scale(pc_type_simple$scores[,1]))
+
 
 saveRDS(set10, "set10.rds")
+saveRDS(set10_simple, "set10_simple.rds")
 
 set10 <- readRDS("set10.rds")
+set10_simple <- readRDS("set10_simple.rds")
 
 # consider multidimensional scaling and self organising maps on the clusters :
 

@@ -87,22 +87,35 @@ saveRDS(thorough_10, "thorough_10.rds")
 # create single print dataset:
 
 print_engagement_10 <- issues_10 * thorough_10
+print_engagement_10_simple <- issues_10
 
 # replace nas with zero's:
 print_engagement_10[is.na(print_engagement_10)] <- 0
+print_engagement_10_simple[is.na(print_engagement_10_simple)] <- 0
 
 saveRDS(print_engagement_10, "print_engagement_10.rds")
+saveRDS(print_engagement_10_simple, "print_engagement_10_simple.rds")
 
 print_engagement_10 <- readRDS("print_engagement_10.rds")
+print_engagement_10_simple <- readRDS("print_engagement_10_simple.rds")
 
 newspapers_engagement_10 <- print_engagement_10[,1:50]
 magazines_engagement_10 <- print_engagement_10[,51:167]
+newspapers_engagement_10_simple <- print_engagement_10_simple[,1:50]
+magazines_engagement_10_simple <- print_engagement_10_simple[,51:167]
+
 
 saveRDS(newspapers_engagement_10, "newspapers_engagement_10.rds")
 saveRDS(magazines_engagement_10, "magazines_engagement_10.rds")
+saveRDS(newspapers_engagement_10_simple, "newspapers_engagement_10_simple.rds")
+saveRDS(magazines_engagement_10_simple, "magazines_engagement_10_simple.rds")
 
 magazines_engagement_10 <- readRDS("magazines_engagement_10.rds")
 newspapers_engagement_10 <- readRDS("newspapers_engagement_10.rds")
+magazines_engagement_10_simple <- readRDS("magazines_engagement_10_simple.rds")
+newspapers_engagement_10_simple <- readRDS("newspapers_engagement_10_simple.rds")
+
+
 
 ## 2nd Electronic Media Set
 # RADIO
@@ -112,16 +125,16 @@ names_radio_10_4w <- electr_10_labels %>%
         str_replace('.+-','') %>%
         str_trim()
 
-names_radio_10_4w <- names_radio_10_4w[1:94] # get rid of "unsure" and "none" and summaries
+names_radio_10_4w <- names_radio_10_4w[c(1:94,97)] # get rid of "unsure" and "none" and summaries
 
 
 # most radio stations in 4 weeks, so use that to create names list
-names_radio_10 <- names_radio_10_4w
+# names_radio_10 <- names_radio_10_4w
 
 # check_radio <- readRDS("names_radio_12_copy.rds")
 # fix(names_radio_10)
 # 
-# saveRDS(names_radio_10, "names_radio_10.rds")
+saveRDS(names_radio_10, "names_radio_10.rds")
 names_radio_10 <- readRDS('names_radio_10.rds')
 
 names_radio_10_7 <- electr_10_labels %>%
@@ -129,7 +142,7 @@ names_radio_10_7 <- electr_10_labels %>%
         str_replace('.+-','') %>%
         str_trim()
 
-names_radio_10_7 <- names_radio_10_7[1:83] # get rid of "unsure" and "none" and summaries
+names_radio_10_7 <- names_radio_10_7[c(1:83, 86)] # get rid of "unsure" and "none" and summaries
 
 
 names_radio_10_y <- electr_10_labels %>%
@@ -137,7 +150,7 @@ names_radio_10_y <- electr_10_labels %>%
         str_replace('.+-','') %>%
         str_trim()
 
-names_radio_10_y <- names_radio_10_y[2:67] # get rid of "unsure" and "none" and summaries
+names_radio_10_y <- names_radio_10_y[c(2:67, 70)] # get rid of "unsure" and "none" and summaries
 
 # get data...
 # 4 weeks:
@@ -145,7 +158,7 @@ colnames_4weeks <- electr_10_labels %>%
         str_subset('Listened to this radio station in the past 4 weeks') %>%
         str_replace('Listened.+','') %>%
         str_trim()
-colnames_4weeks <- colnames_4weeks[1:94]
+colnames_4weeks <- colnames_4weeks[c(1:94,97)]
 radio4weeks_10 <- electr_10[,names(electr_10) %in% colnames_4weeks]
 
 # 7 days
@@ -153,7 +166,7 @@ colnames_7days <- electr_10_labels %>%
         str_subset('Listened to this radio station in the past 7 days') %>%
         str_replace('Listened.+','') %>%
         str_trim()
-colnames_7days <- colnames_7days[1:83]
+colnames_7days <- colnames_7days[c(1:83, 86)]
 radio7days_10 <- electr_10[,names(electr_10) %in% colnames_7days]
 
 # yesterday
@@ -161,7 +174,7 @@ colnames_yesterday <- electr_10_labels %>%
         str_subset('Listened to this radio station yesterday') %>%
         str_replace('Listened.+','') %>%
         str_trim()
-colnames_yesterday <- colnames_yesterday[2:67]
+colnames_yesterday <- colnames_yesterday[c(2:67,70)]
 radioYesterday_10 <- electr_10[,names(electr_10) %in% colnames_yesterday]
 
 # want to create two sparser sets for 7 days & yesterday to add up with 4week set
@@ -172,8 +185,8 @@ length(names_radio_10_4w[which(!names_radio_10_4w %in% names_radio_10_y)])
 ind_7 <- c(38, 42, 47, 66, 70, 74, 75, 76, 88, 93, 94)
 ind_y <- c(19, 35, 37, 38, 42, 45, 47, 58, 62, 66, 67, 70, 71, 72, 73, 74, 75, 76, 82, 83, 86, 87, 88, 89, 90, 91, 93, 94)
 
-mat_7 <- data.frame(matrix(0, nrow = 25160, ncol = 94))
-mat_y <- data.frame(matrix(0, nrow = 25160, ncol = 94))
+mat_7 <- data.frame(matrix(0, nrow = 25160, ncol = 95))
+mat_y <- data.frame(matrix(0, nrow = 25160, ncol = 95))
 
 mat_7[,-ind_7] <- radio7days_10
 mat_y[,-ind_y] <- radioYesterday_10
@@ -198,7 +211,7 @@ check_tv_names_12 <- readRDS("names_tv_12.rds")
 # saveRDS(names_tv_10, "names_tv_10.rds")
 # names_tv_10 <- readRDS("names_tv_10.rds")
 
-# want to isolate only past 4 weeks (no DSTV yet)
+# want to isolate only past 4 weeks (no DSTV yet) # no "other tv
 tv4weeks_10 <- electr_10[,c('ca50co11_9', # "e TV"
                             'ca50co13_7', # "MNet Main" 
                             'ca50co13_9', # "MNet Community"
@@ -356,10 +369,13 @@ names(internet_level2) <- c('int_search',
 
 ## create single dataframe for internet multiplying internet_level1 with sum of internet_level2:
 internet_engagement_10 <- internet_level2  * internet_level1
+internet_engagement_10_simple <- internet_level1
 
 saveRDS(internet_engagement_10, "internet_engagement_10.rds")
+saveRDS(internet_engagement_10_simple, "internet_engagement_10_simple.rds")
 
 internet_engagement_10 <- readRDS("internet_engagement_10.rds")
+internet_engagement_10_simple <- readRDS("internet_engagement_10_simple.rds")
 
 ## create single dataframe for media10, including total_engagement columns (consider using media groupings .. follow up on this!)
 
@@ -370,12 +386,26 @@ media_type_10 <- data.frame(cbind(qn = print_10$qn,
                                   scale(rowSums(radio_engagement_10)),
                                   scale(rowSums(tv_engagement_10)),
                                   scale(rowSums(internet_engagement_10))))
+media_type_10_simple <- data.frame(cbind(qn = print_10$qn,
+                                  scale(rowSums(newspapers_engagement_10_simple)),
+                                  scale(rowSums(magazines_engagement_10_simple)),
+                                  scale(rowSums(radio_engagement_10)),
+                                  scale(rowSums(tv_engagement_10)),
+                                  scale(internet_engagement_10_simple)))
+
 names(media_type_10) <- c("qn",
                           "newspapers",
                           "magazines",
                           "radio",
                           "tv",
                           "internet")
+names(media_type_10_simple) <- c("qn",
+                          "newspapers",
+                          "magazines",
+                          "radio",
+                          "tv",
+                          "internet")
+
 # Level 2: Vehicles
 media_vehicles_10 <- data.frame(cbind(qn = print_10$qn,
                                       newspapers_engagement_10,
@@ -384,11 +414,22 @@ media_vehicles_10 <- data.frame(cbind(qn = print_10$qn,
                                       tv_engagement_10,
                                       internet_engagement_10))
 
+media_vehicles_10_simple <- data.frame(cbind(qn = print_10$qn,
+                                      newspapers_engagement_10_simple,
+                                      magazines_engagement_10_simple,
+                                      radio_engagement_10,
+                                      tv_engagement_10,
+                                      internet_engagement_10_simple))
+
 saveRDS(media_type_10, 'media_type_10.rds')
+saveRDS(media_type_10_simple, 'media_type_10_simple.rds')
 saveRDS(media_vehicles_10, 'media_vehicles_10.rds')
+saveRDS(media_vehicles_10_simple, 'media_vehicles_10_simple.rds')
 
 media_type_10 <- readRDS("media_type_10.rds")
+media_type_10_simple <- readRDS("media_type_10_simple.rds")
 media_vehicles_10 <- readRDS("media_vehicles_10.rds")
+media_vehicles_10_simple <- readRDS("media_vehicles_10_simple.rds")
 
 ## 4th Demographics Set (see notes for descriptions)
 
