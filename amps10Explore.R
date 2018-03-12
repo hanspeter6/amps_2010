@@ -139,7 +139,7 @@ table(kmeans10$cluster) #
 # add cluster labels to the dataset
 set10 <- set10 %>%
         mutate(cluster = factor(kmeans10$cluster))
-set10_simpole <- set10_simple %>%
+set10_simple <- set10_simple %>%
         mutate(cluster = factor(kmeans10_simple$cluster))
 
 
