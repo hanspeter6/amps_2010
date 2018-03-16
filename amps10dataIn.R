@@ -386,6 +386,15 @@ media_type_10 <- data.frame(cbind(qn = print_10$qn,
                                   scale(rowSums(radio_engagement_10)),
                                   scale(rowSums(tv_engagement_10)),
                                   scale(rowSums(internet_engagement_10))))
+names(media_type_10) <- c("qn",
+                          "newspapers",
+                          "magazines",
+                          "radio",
+                          "tv",
+                          "internet")
+media_type_10 <- media_type_10 %>%
+        mutate(all = as.vector(scale(newspapers + magazines + radio + tv + internet))) 
+
 media_type_10_simple <- data.frame(cbind(qn = print_10$qn,
                                   scale(rowSums(newspapers_engagement_10_simple)),
                                   scale(rowSums(magazines_engagement_10_simple)),
@@ -393,18 +402,15 @@ media_type_10_simple <- data.frame(cbind(qn = print_10$qn,
                                   scale(rowSums(tv_engagement_10)),
                                   scale(internet_engagement_10_simple)))
 
-names(media_type_10) <- c("qn",
-                          "newspapers",
-                          "magazines",
-                          "radio",
-                          "tv",
-                          "internet")
 names(media_type_10_simple) <- c("qn",
                           "newspapers",
                           "magazines",
                           "radio",
                           "tv",
                           "internet")
+media_type_10_simple <- media_type_10_simple %>%
+        mutate(all = as.vector(scale(newspapers + magazines + radio + tv + internet))) 
+
 
 # Level 2: Vehicles
 media_vehicles_10 <- data.frame(cbind(qn = print_10$qn,
@@ -432,8 +438,6 @@ media_vehicles_10 <- readRDS("media_vehicles_10.rds")
 media_vehicles_10_simple <- readRDS("media_vehicles_10_simple.rds")
 
 ## 4th Demographics Set (see notes for descriptions)
-
-
 
 age <- personal_10[,'ca56co34'] -1 # for some reason 2-9 vs 1-8 elsewhere (double check this)
 sex <- demogrs_10[,'ca91co51a']
@@ -480,24 +484,7 @@ metro <- ifelse(metro %in% c(14), 13,metro)
 lang <- demogrs_10[,'ca91co75'] + 1 # change 0 to 1, so add one to all
 lifestages <- demogrs_10[,'ca91co77']
 mar_status <- personal_10[,'ca56co09']
-# pers_inc1 <- personal_10[,'ca57co61']
-# pers_inc2 <- personal_10[,'ca57co62'] + 10
-# pers_inc3 <- personal_10[,'ca57co63'] + 20
-# pers_inc4 <- personal_10[,'ca57co64'] + 30
-# for(i in 1: length(pers_inc4)) {
-#         if(!is.na(pers_inc4[i])) {
-#                 if(pers_inc4[i] == 31) {
-#                         pers_inc4[i] <- 0
-#                 }
-#                 if(pers_inc4[i] == 32) {
-#                         pers_inc4[i] <- 60
-#                 }
-#         }
-# }
-# pers_inc <- rowSums(cbind(pers_inc1,
-#                           pers_inc2,
-#                           pers_inc3,
-#                           pers_inc4), na.rm = TRUE)
+
 lsm <- lsm_10[,'ca91co64']
 lsm <- ifelse(lsm == 0,10,lsm)
 
@@ -528,13 +515,87 @@ demographics_10 <- data.frame(qn = print_10$qn,
                               lang,
                               lifestages,
                               mar_status,
-                              # pers_inc,
                               lsm,
                               lifestyle,
                               attitudes)
 
+#reducing levels of categorical variables and setting factor types for demographics:
 
-# save as
+# age:
+demographics_10$age <- ifelse(demographics_10$age %in% c(1,2), 1, demographics_10$age)
+demographics_10$age <- ifelse(demographics_10$age %in% c(3,4), 2, demographics_10$age)
+demographics_10$age <- ifelse(demographics_10$age %in% c(5,6), 3, demographics_10$age)
+demographics_10$age <- ifelse(demographics_10$age %in% c(7,8), 4, demographics_10$age)
+demographics_10$age <- factor(demographics_10$age, ordered = TRUE)
+
+# sex:
+demographics_10$sex <- factor(demographics_10$sex, ordered = FALSE)
+
+#edu:
+demographics_10$edu <- ifelse(demographics_10$edu %in% c(1,2,3,4), 1, demographics_10$edu)
+demographics_10$edu <- ifelse(demographics_10$edu %in% c(5), 2, demographics_10$edu)
+demographics_10$edu <- ifelse(demographics_10$edu %in% c(6,7,8), 3, demographics_10$edu)
+demographics_10$edu <- factor(demographics_10$edu, ordered = TRUE)
+
+#hh_inc
+demographics_10$hh_inc <- ifelse(demographics_10$hh_inc %in% c(1,2,3,4), 1, demographics_10$hh_inc)
+demographics_10$hh_inc <- ifelse(demographics_10$hh_inc %in% c(5,6), 2, demographics_10$hh_inc)
+demographics_10$hh_inc <- ifelse(demographics_10$hh_inc %in% c(7), 3, demographics_10$hh_inc)
+demographics_10$hh_inc <- ifelse(demographics_10$hh_inc %in% c(8), 4, demographics_10$hh_inc)
+demographics_10$hh_inc <- factor(demographics_10$hh_inc, ordered = TRUE)
+
+demographics_10$race <- factor(demographics_10$race, ordered = FALSE)
+demographics_10$province <- factor(demographics_10$province, ordered = FALSE)
+demographics_10$metro <- factor(demographics_10$metro, ordered = FALSE)
+demographics_10$lang <- factor(demographics_10$lang, ordered = FALSE)
+demographics_10$lifestages <- factor(demographics_10$lifestages, ordered = FALSE)
+demographics_10$mar_status <- factor(demographics_10$mar_status, ordered = FALSE)
+
+# lsm
+demographics_10$lsm <- ifelse(demographics_10$lsm %in% c(1,2), 1, demographics_10$lsm)
+demographics_10$lsm <- ifelse(demographics_10$lsm %in% c(3,4), 2, demographics_10$lsm)
+demographics_10$lsm <- ifelse(demographics_10$lsm %in% c(5,6), 3, demographics_10$lsm)
+demographics_10$lsm <- ifelse(demographics_10$lsm %in% c(7,8), 4, demographics_10$lsm)
+demographics_10$lsm <- ifelse(demographics_10$lsm %in% c(9,10), 5, demographics_10$lsm)
+demographics_10$lsm <- factor(demographics_10$lsm, ordered = TRUE)
+
+demographics_10$lifestyle <- factor(demographics_10$lifestyle, ordered = FALSE)
+demographics_10$attitudes <- factor(demographics_10$attitudes, ordered = FALSE)
 
 saveRDS(demographics_10, "demographics_10.rds")
 demographics_10 <- readRDS("demographics_10.rds")
+
+
+# read datafiles again (if necessary)
+magazines_engagement_10 <- readRDS("magazines_engagement_10.rds")
+magazines_engagement_10_simple <- readRDS("magazines_engagement_10_simple.rds")
+newspapers_engagement_10 <- readRDS("newspapers_engagement_10.rds")
+newspapers_engagement_10_simple <- readRDS("newspapers_engagement_10_simple.rds")
+radio_engagement_10 <- readRDS("radio_engagement_10.rds")
+tv_engagement_10 <- readRDS("tv_engagement_10.rds")
+internet_engagement_10 <- readRDS("internet_engagement_10.rds")
+internet_engagement_10_simple <- readRDS("internet_engagement_10_simple.rds")
+
+media_type_10 <- readRDS("media_type_10.rds")
+media_type_10_simple <- readRDS("media_type_10_simple.rds")
+media_vehicles_10 <- readRDS("media_vehicles_10.rds")
+media_vehicles_10_simple <- readRDS("media_vehicles_10_simple.rds")
+
+demographics_10 <- readRDS("demographics_10.rds")
+
+
+# #create single dataset minus non metropolitans
+set10 <- demographics_10 %>%
+        left_join(media_type_10) %>%
+        left_join(media_vehicles_10) %>%
+        filter(metro != 0)
+
+set10_simple <- demographics_10 %>%
+        left_join(media_type_10_simple) %>%
+        left_join(media_vehicles_10_simple) %>%
+        filter(metro != 0)
+
+# save them:
+saveRDS(set10, "set10.rds")
+saveRDS(set10_simple, "set10_simple.rds")
+
