@@ -43,31 +43,6 @@ names_print_10 <- str_subset(print_10_labels, 'Number of different issues usuall
 
 names_print_10 <- readRDS("names_print_10.rds")
 
-# names_dailies_10 <- names_print_10[1:22]
-# names_biweeklies_10 <- names_print_10[23]
-# names_weeklies_10 <- names_print_10[24:52]
-
-# # NBNB: Not community papers in 2010...
-# names_community_cape_town <- names_print[40:51]
-# names_community_restCape <- names_print[52:61]
-# names_community_FreeState <- names_print[62:66]
-# names_community_NWest <- names_print[67:68]
-# names_community_Jhb <- names_print[69]
-# names_community_ERand <- names_print[70:71]
-# names_community_KZn <- names_print[72:74]
-# 
-# names_mags_weekly_10 <- names_print_10[53:65]
-# names_fortnightly_mags_10 <- names_print_10[66:67]
-# names_monthly_news_10 <- names_print_10[68:69]
-# names_monthly_mags_10 <- names_print_10[70:147]
-# 
-# names_alt_monthly_10 <- names_print_10[150:161]
-# names_quarterly_mags_10 <- names_print_10[164:168]
-# 
-# names_monthly_store_mags_10 <- names_print_10[148:149]
-# names_alt_month_store_mags_10 <- names_print_10[162:163]
-# names_quarterly_store_mags_10 <- names_print_10[169:172]
-
 # create print dataset:
 issues_10 <- print_10[,str_detect(names(print_10), 'ca[345678]co\\d{2}')]
 names(issues_10) <- names_print_10
@@ -381,11 +356,11 @@ internet_engagement_10_simple <- readRDS("internet_engagement_10_simple.rds")
 
 # Level 1: Type
 media_type_10 <- data.frame(cbind(qn = print_10$qn,
-                                  scale(rowSums(newspapers_engagement_10)),
-                                  scale(rowSums(magazines_engagement_10)),
-                                  scale(rowSums(radio_engagement_10)),
-                                  scale(rowSums(tv_engagement_10)),
-                                  scale(rowSums(internet_engagement_10))))
+                                  rowSums(newspapers_engagement_10),
+                                  rowSums(magazines_engagement_10),
+                                  rowSums(radio_engagement_10),
+                                  rowSums(tv_engagement_10),
+                                  rowSums(internet_engagement_10)))
 names(media_type_10) <- c("qn",
                           "newspapers",
                           "magazines",
@@ -393,14 +368,14 @@ names(media_type_10) <- c("qn",
                           "tv",
                           "internet")
 media_type_10 <- media_type_10 %>%
-        mutate(all = as.vector(scale(newspapers + magazines + radio + tv + internet))) 
+        mutate(all = as.vector(newspapers + magazines + radio + tv + internet)) 
 
 media_type_10_simple <- data.frame(cbind(qn = print_10$qn,
-                                  scale(rowSums(newspapers_engagement_10_simple)),
-                                  scale(rowSums(magazines_engagement_10_simple)),
-                                  scale(rowSums(radio_engagement_10)),
-                                  scale(rowSums(tv_engagement_10)),
-                                  scale(internet_engagement_10_simple)))
+                                  rowSums(newspapers_engagement_10_simple),
+                                  rowSums(magazines_engagement_10_simple),
+                                  rowSums(radio_engagement_10),
+                                  rowSums(tv_engagement_10),
+                                  internet_engagement_10_simple))
 
 names(media_type_10_simple) <- c("qn",
                           "newspapers",
@@ -409,7 +384,7 @@ names(media_type_10_simple) <- c("qn",
                           "tv",
                           "internet")
 media_type_10_simple <- media_type_10_simple %>%
-        mutate(all = as.vector(scale(newspapers + magazines + radio + tv + internet))) 
+        mutate(all = as.vector(newspapers + magazines + radio + tv + internet)) 
 
 
 # Level 2: Vehicles
@@ -594,6 +569,10 @@ set10_simple <- demographics_10 %>%
         left_join(media_type_10_simple) %>%
         left_join(media_vehicles_10_simple) %>%
         filter(metro != 0)
+
+# scale media type and media vehicles
+set10[,16:298] <- scale(set10[,16:298])
+set10_simple[,16:293] <- scale(set10_simple[,16:293])
 
 # save them:
 saveRDS(set10, "set10.rds")

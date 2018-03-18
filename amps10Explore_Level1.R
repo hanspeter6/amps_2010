@@ -15,6 +15,7 @@ library(nFactors)
 library(FactoMineR)
 library(factoextra)
 library(gridExtra)
+library(ggplot2)
 
 #  read in datasets
 set10 <- readRDS("set10.rds")
@@ -32,13 +33,6 @@ corrplot(cor(set10[,c("newspapers","magazines","radio", "tv", "internet")]),
          tl.pos = TRUE)
 dev.off()
 
-# # consider some clustering
-# # construct distance matrix for newspapers, magazines, radio, tv and internet engagement:
-# 
-# dist10 <- dist(set10[,c("newspapers","magazines","radio", "tv", "internet")])
-# clust10 <- hclust(dist10, method = "complete")
-# plot(clust10) # messy, unhelpful
-
 ## consider kmeans
 wss <- vector()
 for(k in c(1,2,3,4,5,6)) {
@@ -53,10 +47,11 @@ png('kmeansTypePlot2010.png')
 plot(c(1,2,3,4,5,6), wss, type = "b", xlab = "k-values", ylab = "total within sum of squares" )
 dev.off()
 
-set.seed(56)
+set.seed(65)
 kmeans10 <- kmeans(set10[,c("newspapers","magazines","radio", "tv", "internet","all")],
                    centers = 4,
-                   nstart = 20)
+                   nstart = 20,
+                   iter.max = 20)
 set.seed(56)
 kmeans10_simple <- kmeans(set10_simple[,c("newspapers","magazines","radio", "tv", "internet", "all")],
                           centers = 4,
@@ -67,31 +62,105 @@ table(kmeans10$cluster) #
 
 # Comparing 2012 with 2010... will change colours to reflect meanin based on 2012:
 
-# green and stays green: 2 stays 2
-# pink becomes red: 4 becomes 1
-#  blue becomes pink\: 3 becomes 4
-#  red becomes blue: 1 becomes 3
+# green becomes red: 2 becomes 1
+# lilac becomes blue: 4 becomes 3
+# blue becomes green: 3 becomes 2
+#  red becomes lilac: 1 becomes 4
 
-kmeans10$cluster <- ifelse(kmeans10$cluster == 4, 6, kmeans10$cluster)
-kmeans10$cluster <- ifelse(kmeans10$cluster == 3, 9, kmeans10$cluster)
-kmeans10$cluster <- ifelse(kmeans10$cluster == 1, 8, kmeans10$cluster)
-kmeans10$cluster <- ifelse(kmeans10$cluster == 2, 7, kmeans10$cluster)
+kmeans10$cluster <- ifelse(kmeans10$cluster == 1, 9, kmeans10$cluster)
+kmeans10$cluster <- ifelse(kmeans10$cluster == 2, 6, kmeans10$cluster)
+kmeans10$cluster <- ifelse(kmeans10$cluster == 3, 7, kmeans10$cluster)
+kmeans10$cluster <- ifelse(kmeans10$cluster == 4, 8, kmeans10$cluster)
 kmeans10$cluster <- kmeans10$cluster - 5
+
 # add cluster labels to the dataset
-set10 <- set10 %>%
+set10c <- set10 %>%
         mutate(cluster = factor(kmeans10$cluster))
 
-
-
-
-set10_simple <- set10_simple %>%
+set10c_simple <- set10_simple %>%
         mutate(cluster = factor(kmeans10_simple$cluster))
 
-saveRDS(set10, "set10.rds")
-saveRDS(set10_simple, "set10_simple.rds")
+saveRDS(set10c, "set10c.rds")
+saveRDS(set10c_simple, "set10c_simple.rds")
 
-set10 <- readRDS("set10.rds")
-set10_simple <- readRDS("set10_simple.rds")
+set10c <- readRDS("set10c.rds")
+set10c_simple <- readRDS("set10c_simple.rds")
+
+# some plots
+# boxplots of clusters and media types
+p1 <- ggplot(set10c, aes(cluster, all, fill = cluster)) +
+        geom_boxplot() +
+        guides(fill = FALSE) +
+        labs(title = "all")
+p2 <- ggplot(set10c, aes(cluster, newspapers, fill = cluster)) +
+        geom_boxplot() +
+        guides(fill = FALSE) +
+        labs(title = "newspapers")
+p3 <- ggplot(set10c, aes(cluster, magazines, fill = cluster)) +
+        geom_boxplot() +
+        guides(fill = FALSE) +
+        labs(title = "magazines")
+p4 <- ggplot(set10c, aes(cluster, radio, fill = cluster)) +
+        geom_boxplot() +
+        guides(fill = FALSE) +
+        labs(title = "radio")
+p5 <- ggplot(set10c, aes(cluster, tv, fill = cluster)) +
+        geom_boxplot() +
+        guides(fill = FALSE) +
+        labs(title = "tv")
+p6 <- ggplot(set10c, aes(cluster, internet, fill = cluster)) +
+        geom_boxplot() +
+        guides(fill = FALSE) +
+        labs(title = "internet")
+
+jpeg('typeBoxPlots_10.jpeg', quality = 100, type = "cairo")
+grid.arrange(p1, p2, p3, p4, p5,p6,  ncol=3, nrow = 2)
+dev.off()
+
+# try to make sense of demographics
+d1 <- ggplot(set10c, aes(race, cluster, fill = cluster)) +
+        geom_col() +
+        labs(title = "race", y = "", x = "") +
+        scale_x_discrete(labels=c("black", "coloured", "indian", "white"))
+d2 <- ggplot(set10c, aes(edu, cluster, fill = cluster)) +
+        geom_col() +
+        labs(title = "education", y = "", x = "") +
+        scale_x_discrete(labels=c("<matric", "matric",">matric"))
+d3 <- ggplot(set10c, aes(age, cluster, fill = cluster)) +
+        geom_col() +
+        labs(title = "age", y = "", x = "") +
+        scale_x_discrete(labels=c("15-24","25-44", "45-54","55+"))
+d4 <- ggplot(set10c, aes(lsm, cluster, fill = cluster)) +
+        geom_col() +
+        labs(title = "lsm", y = "", x = "") +
+        scale_x_discrete(labels=c("1-2", "3-4", "5-6", "7-8", "9-10"))
+
+jpeg('typeDemogPlots1_10.jpeg', quality = 100, type = "cairo")
+grid.arrange(d1, d2, d3, d4, ncol=2, nrow = 2)
+dev.off()
+
+d5 <- ggplot(set10c, aes(sex, cluster, fill = cluster)) +
+        geom_col() +
+        labs(title = "gender", y = "", x = "") +
+        scale_x_discrete(labels=c("male", "female"))
+d6 <- ggplot(set10c, aes(hh_inc, cluster, fill = cluster)) +
+        geom_col() +
+        labs(title = "household income", y = "", x = "") +
+        scale_x_discrete(labels=c("<5000","5000-10999","11000-19999",">=20000"))
+d7 <- ggplot(set10c, aes(lifestages, cluster, fill = cluster)) +
+        geom_col() +
+        labs(title = "lifestages", y = "", x = "")# +
+# scale_x_discrete(labels=c("<5000","5000-10999","11000-19999",">=20000"))
+d8 <- ggplot(set10c, aes(lifestyle, cluster, fill = cluster)) +
+        geom_col() +
+        labs(title = "lifestyle", y = "", x = "")# +
+# scale_x_discrete(labels=c("<5000","5000-10999","11000-19999",">=20000"))
+jpeg('typeDemogPlots2_10.jpeg', quality = 100, type = "cairo")
+grid.arrange(d5, d6, d7, d8, ncol=2, nrow = 2)
+dev.off()
+
+
+
 
 # consider multidimensional scaling and self organising maps on the clusters :
 
@@ -202,33 +271,3 @@ rpart.plot(tree10, type = 4, extra = 1, cex = 0.5)
 
 percentile <- ecdf(set10$internet)
 percentile(1.4)
-
-# some plots
-jpeg('typeBoxPlots_10.jpeg', quality = 100, type = "cairo")
-par(mfrow = c(2,3))
-plot(set10$radio ~ set10$cluster, col = c(2,3,4,6), main = "radio", xlab = "cluster", ylab = '')
-plot(set10$tv ~ set10$cluster, col = c(2,3,4,6), main = "tv", xlab = "cluster", ylab = '')
-plot(set10$newspapers ~ set10$cluster, col = c(2,3,4,6), main = "newspapers", xlab = "cluster", ylab = '')
-plot(set10$magazines ~ set10$cluster, col = c(2,3,4,6), main = "magazines", xlab = "cluster", ylab = '')
-plot(set10$internet ~ set10$cluster, col = c(2,3,4,6), main = "internet", xlab = "cluster", ylab = '')
-plot(set10$all ~ set10$cluster, col = c(2,3,4,6), main = "all", xlab = "cluster", ylab = '')
-dev.off()
-
-# try to make sense of demographics
-jpeg('typeDemogPlots1_10.jpeg', quality = 100, type = "cairo")
-par(mfrow = c(2,2))
-plot(set10$cluster ~ factor(set10$race,labels = c("black", "coloured", "indian", "white")), col = c(2,3,4,6), main = "race", xlab = "", ylab = "")
-plot(set10$cluster ~ factor(set10$edu, labels = c("<matric", "matric",">matric" )), col = c(2,3,4,6), main = "education", xlab = "", ylab = "")
-plot(set10$cluster ~ factor(set10$age, labels = c("15-24","25-44", "45-54","55+")), col = c(2,3,4,6), main = "age", xlab = "", ylab = "")
-plot(set10$cluster ~ factor(set10$lsm, labels = c("1-2", "3-4", "5-6", "7-8", "9-10")), col = c(2,3,4,6), main = "LSM", xlab = "", ylab = "")
-dev.off()
-
-jpeg('typeDemogPlots2_10.jpeg', quality = 100, type = "cairo")
-par(mfrow = c(2,2))
-plot(set10$cluster ~ factor(set10$sex, labels = c("male", "female")), col = c(2,3,4,6), main = "sex", xlab = "", ylab = "")
-plot(set10$cluster ~ factor(set10$hh_inc, labels = c("<2500","2500-6999","7000-11999",">=10000")), col = c(2,3,4,6), main = "hh_inc", xlab = "", ylab = "")
-# plot(set10$cluster ~ set10$lifestages, col = c(2,3,4,6), main = "lifestages", xlab = "", ylab = "") # appears to be not available, unless I extract summaries myself from lifestages set...
-plot(set10$cluster ~ set10$lifestyle, col = c(2,3,4,6), main = "lifestyle", xlab = "", ylab = "")
-dev.off()
-
-
