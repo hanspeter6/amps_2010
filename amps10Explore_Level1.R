@@ -75,10 +75,12 @@ kmeans10$cluster <- kmeans10$cluster - 5
 
 # add cluster labels to the dataset
 set10c <- set10 %>%
-        mutate(cluster = factor(kmeans10$cluster))
-
-set10c_simple <- set10_simple %>%
-        mutate(cluster = factor(kmeans10_simple$cluster))
+        mutate(cluster = factor(kmeans10$cluster)) %>%
+        dplyr::select(qn, pwgt, cluster, everything())
+# 
+set10c_simple <- set10_simple %>% ### sort out bloody internet thingy
+        mutate(cluster = factor(kmeans10_simple$cluster)) %>%
+        dplyr::select(qn, pwgt, cluster, everything())
 
 saveRDS(set10c, "set10c.rds")
 saveRDS(set10c_simple, "set10c_simple.rds")

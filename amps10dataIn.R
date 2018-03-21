@@ -1,6 +1,7 @@
 # libraries
 library(stringr)
 library(tidyverse)
+library(caret)
 
 print_10 <- read.csv("/Users/HansPeter/Dropbox/Statistics/UCTDataScience/Thesis/amps_2010/csv/amps-2010-newspaper-magazine-readership-v1.1.csv")
 electr_10 <- read.csv("/Users/HansPeter/Dropbox/Statistics/UCTDataScience/Thesis/amps_2010/csv/amps-2010-electronic-media-v1.1.csv")
@@ -457,7 +458,15 @@ metro <- ifelse(metro %in% c(13), 12,metro)
 metro <- ifelse(metro %in% c(14), 13,metro)
 
 lang <- demogrs_10[,'ca91co75'] + 1 # change 0 to 1, so add one to all
-lifestages <- demogrs_10[,'ca91co77']
+
+
+
+
+lifestages <- demogrs_10[,'ca91co77'] # need to sort this out.... check out files, otherwise drop it..
+
+
+
+
 mar_status <- personal_10[,'ca56co09']
 
 lsm <- lsm_10[,'ca91co64']
@@ -570,9 +579,22 @@ set10_simple <- demographics_10 %>%
         left_join(media_vehicles_10_simple) %>%
         filter(metro != 0)
 
+# get rid of zero variances:
+ind_10 <- nearZeroVar(set10[,16:ncol(set10)], saveMetrics = TRUE)
+ind_10_simple <- nearZeroVar(set10_simple[,16:ncol(set10_simple)], saveMetrics = TRUE)
+
+good_set <- set10[,16:ncol(set10)][,!ind_10$zeroVar]
+good_set_simple <- set10_simple[,16:ncol(set10_simple)][,!ind_10_simple$zeroVar]
+
+set10 <- data.frame(cbind(set10[,1:15], good_set))
+set10_simple <- data.frame(cbind(set10_simple[,1:15], good_set_simple))
+
 # scale media type and media vehicles
-set10[,16:298] <- scale(set10[,16:298])
-set10_simple[,16:293] <- scale(set10_simple[,16:293])
+set10[,16:ncol(set10)] <- scale(set10[,16:ncol(set10)])
+set10_simple[,ncol(set10_simple)] <- scale(set10_simple[,ncol(set10_simple)])
+
+# correct stupid anomoly
+set10_simple$internet_engagement_10_simple <- as.vector(set10_simple$internet_engagement_10_simple)
 
 # save them:
 saveRDS(set10, "set10.rds")
