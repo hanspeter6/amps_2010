@@ -129,9 +129,9 @@ nuSet10_JHB <- readRDS("nuSet10_JHB.rds")
 #                    rep=100,cent=.05)
 # nS_jhb <- nScree(x=ev_jhb$values, aparallel=ap_jhb$eigen$qevpea)
 # jpeg("nScree_10_jhb")
-# plotnScree(nS_jhb, main = "Johannesburg") # 
+# plotnScree(nS_jhb, main = "Johannesburg") #
 # dev.off()
-#
+
 # npc_ct <- nS_ct$Components$noc
 # npc_jhb <- nS_jhb$Components$noc 
 
