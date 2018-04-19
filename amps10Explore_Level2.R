@@ -19,7 +19,7 @@ library(ggplot2)
 
 # load datafiles 
 set10c <- readRDS("set10c.rds")
-set10c_simple <- readRDS("set10c_simple.rds")
+# set10c_simple <- readRDS("set10c_simple.rds")
 
 # LEVEL 2
 
@@ -60,7 +60,7 @@ nuSet10_JHB$lsm <- scale(as.numeric(nuSet10_JHB$lsm))
 # Cape Town
 nuSet10_CT$cluster <- factor(nuSet10_CT$cluster,
                              levels = c(1,2,3,4),
-                             labels = c("heavy all media", "internet lead", "light all media", "internet lag"))
+                             labels = c("cluster1", "cluster2", "cluster3", "cluster4"))
 nuSet10_CT$sex <- factor(nuSet10_CT$sex,
                          levels = c(1,2),
                          labels = c("male", "female"))
@@ -84,7 +84,7 @@ nuSet10_CT$attitudes <- factor(nuSet10_CT$attitudes,
 # 
 nuSet10_JHB$cluster <- factor(nuSet10_JHB$cluster,
                               levels = c(1,2,3,4),
-                              labels = c("heavy all media", "internet lead", "light all media", "internet lag"))
+                              labels = c("cluster1", "cluster2", "cluster3", "cluster4"))
 nuSet10_JHB$sex <- factor(nuSet10_JHB$sex,
                           levels = c(1,2),
                           labels = c("male", "female"))
@@ -105,8 +105,8 @@ nuSet10_JHB$attitudes <- factor(nuSet10_JHB$attitudes,
                                 labels = c("none", "now generation", "nation builders", "distants survivors", "distants established", "rooted", "global citizens"))
 
 # focussing only on the variable I intend to use in this section (and getting rid of "lifestages):
-nuSet10_CT <- nuSet10_CT[,-c(1:2,9:12, 17:22)]
-nuSet10_JHB <- nuSet10_JHB[,-c(1:2,9:12, 17:22)]
+nuSet10_CT <- nuSet10_CT[,-c(1:2,9:13,15:22)]
+nuSet10_JHB <- nuSet10_JHB[,-c(1:2,9:13,15:22)]
 
 # saving these objects:
 saveRDS(nuSet10_CT, "nuSet10_CT.rds")
@@ -116,20 +116,20 @@ nuSet10_CT <- readRDS("nuSet10_CT.rds")
 nuSet10_JHB <- readRDS("nuSet10_JHB.rds")
 
 # ## Determine Number of Factors to Extract
-# ev_ct <- eigen(cor(nuSet10_CT[,12:ncol(nuSet10_CT)]))
-# ap_ct <- parallel(subject=nrow(nuSet10_CT[,12:ncol(nuSet10_CT)]),var=ncol(nuSet10_CT[,12:ncol(nuSet10_CT)]),
+# ev_ct <- eigen(cor(nuSet10_CT[,8:ncol(nuSet10_CT)]))
+# ap_ct <- parallel(subject=nrow(nuSet10_CT[,8:ncol(nuSet10_CT)]),var=ncol(nuSet10_CT[,8:ncol(nuSet10_CT)]),
 #                   rep=100,cent=.05)
 # nS_ct <- nScree(x=ev_ct$values, aparallel=ap_ct$eigen$qevpea)
 # jpeg("nScree_10_ct")
-# plotnScree(nS_ct, main = "Cape Town") # optimal = 7
+# plotnScree(nS_ct, main = "Cape Town") # optimal = 6
 # dev.off()
 # 
-# ev_jhb <- eigen(cor(nuSet10_JHB[,12:ncol(nuSet10_JHB)]))
-# ap_jhb <- parallel(subject=nrow(nuSet10_JHB[,12:ncol(nuSet10_JHB)]),var=ncol(nuSet10_JHB[,12:ncol(nuSet10_JHB)]),
+# ev_jhb <- eigen(cor(nuSet10_JHB[,8:ncol(nuSet10_JHB)]))
+# ap_jhb <- parallel(subject=nrow(nuSet10_JHB[,8:ncol(nuSet10_JHB)]),var=ncol(nuSet10_JHB[,8:ncol(nuSet10_JHB)]),
 #                    rep=100,cent=.05)
 # nS_jhb <- nScree(x=ev_jhb$values, aparallel=ap_jhb$eigen$qevpea)
 # jpeg("nScree_10_jhb")
-# plotnScree(nS_jhb, main = "Johannesburg") #
+# plotnScree(nS_jhb, main = "Johannesburg") # 6
 # dev.off()
 
 # npc_ct <- nS_ct$Components$noc
@@ -142,16 +142,20 @@ npc_jhb <- 6
 # creating objects with supplementary variables (qualitative and quantitative) and active one defined:
 set.seed(56)
 pca_10_ct <- PCA(nuSet10_CT,
-                 quanti.sup = c(2,4,5,8),
-                 quali.sup = c(1,3,6,7,9,10),
+                 quanti.sup = c(2,4,5,7),
+                 quali.sup = c(1,3,6),
                  ncp = npc_ct,
                  graph = FALSE)
 set.seed(56)
 pca_10_jhb <- PCA(nuSet10_JHB,
-                  quanti.sup = c(2,4,5,8),
-                  quali.sup = c(1,3,6,7,9,10),
+                  quanti.sup = c(2,4,5,7),
+                  quali.sup = c(1,3,6),
                   ncp = npc_jhb,
                   graph = FALSE)
+
+# save for later use:
+saveRDS(pca_10_ct, "pca_10_ct.rds")
+saveRDS(pca_10_jhb, "pca_10_jhb.rds")
 
 # # try FactoInvestigate
 # library(FactoInvestigate)

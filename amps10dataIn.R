@@ -40,9 +40,9 @@ vars_issues_print_10 <- str_subset(print_10_labels, 'Number of different issues 
 
 ##Newspapers
 # fix names and get rid of some and save
-names_newspapers_10_issues <- names_issues_print_10[c(1:50)]
-fix(names_newspapers_10_issues)
-saveRDS(names_newspapers_10_issues, "names_newspapers_10_issues.rds")
+# names_newspapers_10_issues <- names_issues_print_10[c(1:50)]
+# fix(names_newspapers_10_issues)
+# saveRDS(names_newspapers_10_issues, "names_newspapers_10_issues.rds")
 names_newspapers_10_issues <- readRDS("names_newspapers_10_issues.rds")
 
 # vector of variables
@@ -51,9 +51,9 @@ issues_newspapers_10 <- print_10[,vars_newspapers_10_issues]
 
 # Magazines
 # fix names and get rid of some (including MNet guides and save
-names_magazines_10_issues <- names_issues_print_10[c(52:65,67:79,81:87,89:107,110:134,136:165,167)]
-fix(names_magazines_10_issues)
-saveRDS(names_magazines_10_issues, "names_magazines_10_issues.rds")
+# names_magazines_10_issues <- names_issues_print_10[c(52:65,67:79,81:87,89:107,110:134,136:165,167)]
+# fix(names_magazines_10_issues)
+# saveRDS(names_magazines_10_issues, "names_magazines_10_issues.rds")
 names_magazines_10_issues <- readRDS("names_magazines_10_issues.rds")
 
 # vector of variables
@@ -92,45 +92,52 @@ thorough_magazines_10 <- print_10[,vars_magazines_10_thorough]
 
 # # need to reverse numbering to serve as weights (see value_lables text file):
 thorough_magazines_10 <- 7 - thorough_magazines_10
-saveRDS(thorough_magazines_10, "thorough_magazines_10.rds")
 
 # create datasets ...for newspapers and magazines:
-newspapers_engagement_10 <- issues_newspapers_10 * thorough_newspapers_10
-names(newspapers_engagement_10) <- names_newspapers_10_issues
-magazines_engagement_10 <- issues_magazines_10 * thorough_magazines_10
-names(magazines_engagement_10) <- names_magazines_10_issues
+newspapers_engagement_10_all <- issues_newspapers_10 * thorough_newspapers_10
+names(newspapers_engagement_10_all) <- names_newspapers_10_issues
+magazines_engagement_10_all <- issues_magazines_10 * thorough_magazines_10
+names(magazines_engagement_10_all) <- names_magazines_10_issues
 
-newspapers_engagement_10_simple <- issues_newspapers_10
-names(newspapers_engagement_10_simple) <- names_newspapers_10_issues
-magazines_engagement_10_simple <- issues_magazines_10
-names(magazines_engagement_10_simple) <- names_magazines_10_issues
+newspapers_engagement_10_simple_all <- issues_newspapers_10
+names(newspapers_engagement_10_simple_all) <- names_newspapers_10_issues
+magazines_engagement_10_simple_all <- issues_magazines_10
+names(magazines_engagement_10_simple_all) <- names_magazines_10_issues
 
 # # # replace NAs with zeros
-newspapers_engagement_10[is.na(newspapers_engagement_10)] <- 0
-magazines_engagement_10[is.na(magazines_engagement_10)] <- 0
+newspapers_engagement_10_all[is.na(newspapers_engagement_10_all)] <- 0
+magazines_engagement_10_all[is.na(magazines_engagement_10_all)] <- 0
 
-newspapers_engagement_10_simple[is.na(newspapers_engagement_10_simple)] <- 0
-magazines_engagement_10_simple[is.na(magazines_engagement_10_simple)] <- 0
+newspapers_engagement_10_simple_all[is.na(newspapers_engagement_10_simple_all)] <- 0
+magazines_engagement_10_simple_all[is.na(magazines_engagement_10_simple_all)] <- 0
 
-# CLEAN UP
-# for newspapers: include Herald on Sat as Other
-other.news <- as.vector(apply(newspapers_engagement_10[,c(34,35,49)], 1, mean))
-newspapers_engagement_10 <- newspapers_engagement_10 %>%
+# save (alls)
+saveRDS(newspapers_engagement_10_all, "newspapers_engagement_10_all.rds")
+saveRDS(magazines_engagement_10_all, "magazines_engagement_10_all.rds")
+saveRDS(newspapers_engagement_10_simple_all, "newspapers_engagement_10_simple_all.rds")
+saveRDS(magazines_engagement_10_simple_all, "magazines_engagement_10_simple_all.rds")
+
+
+## CLEAN UP and reduce variables
+# for newspapers: include "Soccer Week", "Sondag" and "The Zimbabwean" as "other.news"
+other.news <- as.vector(apply(newspapers_engagement_10_all[,c(34,35,49)], 1, mean))
+newspapers_engagement_10 <- newspapers_engagement_10_all %>%
         mutate(other.news = other.news)
 newspapers_engagement_10 <- newspapers_engagement_10[,-c(34,35,49)]
 
 # for magazines - deal with it in vehicle_cleaning project
+magazines_engagement_10 <- readRDS("/Users/HansPeter/Dropbox/Statistics/UCTDataScience/Thesis/vehicle_cleaning/magazines_engagement_10.rds")
 
-# save them
+# save them in this project
 saveRDS(newspapers_engagement_10, "newspapers_engagement_10.rds")
 saveRDS(magazines_engagement_10, "magazines_engagement_10.rds")
-saveRDS(newspapers_engagement_10_simple, "newspapers_engagement_10_simple.rds")
-saveRDS(magazines_engagement_10_simple, "magazines_engagement_10_simple.rds")
+# saveRDS(newspapers_engagement_10_simple, "newspapers_engagement_10_simple.rds")
+# saveRDS(magazines_engagement_10_simple, "magazines_engagement_10_simple.rds")
 
 magazines_engagement_10 <- readRDS("magazines_engagement_10.rds")
 newspapers_engagement_10 <- readRDS("newspapers_engagement_10.rds")
-magazines_engagement_10_simple <- readRDS("magazines_engagement_10_simple.rds")
-newspapers_engagement_10_simple <- readRDS("newspapers_engagement_10_simple.rds")
+# magazines_engagement_10_simple <- readRDS("magazines_engagement_10_simple.rds")
+# newspapers_engagement_10_simple <- readRDS("newspapers_engagement_10_simple.rds")
 
 
 ## 2nd Electronic Media Set
@@ -141,16 +148,16 @@ names_radio_10_4w <- electr_10_labels %>%
         str_replace('.+-','') %>%
         str_trim()
 
-names_radio_10_4w <- names_radio_10_4w[c(1:94,97)] # get rid of "unsure" and "none" and summaries
-
+# names_radio_10_4w <- names_radio_10_4w[c(1:94,97)] # get rid of "unsure" and "none" and summaries
+# 
 
 # most radio stations in 4 weeks, so use that to create names list
 # names_radio_10 <- names_radio_10_4w
 
-# check_radio <- readRDS("names_radio_12_copy.rds")
-fix(names_radio_10)
+# # check_radio <- readRDS("names_radio_12_copy.rds")
+# fix(names_radio_10)
 # 
-saveRDS(names_radio_10, "names_radio_10.rds")
+# saveRDS(names_radio_10, "names_radio_10.rds")
 names_radio_10 <- readRDS('names_radio_10.rds')
 
 names_radio_10_7 <- electr_10_labels %>%
@@ -207,16 +214,19 @@ mat_y <- data.frame(matrix(0, nrow = 25160, ncol = 95))
 mat_7[,-ind_7] <- radio7days_10
 mat_y[,-ind_y] <- radioYesterday_10
         
-radio_engagement_10 <- radio4weeks_10 + mat_7 + mat_y
-names(radio_engagement_10) <- names_radio_10
+radio_engagement_10_all <- radio4weeks_10 + mat_7 + mat_y
+names(radio_engagement_10_all) <- names_radio_10
 
-saveRDS(radio_engagement_10, "radio_engagement_10.rds")
-radio_engagement_10 <- readRDS("radio_engagement_10.rds")
+saveRDS(radio_engagement_10_all, "radio_engagement_10_all.rds")
+radio_engagement_10_all <- readRDS("radio_engagement_10_all.rds")
+
+# AFTER CLEANING (see vehicle cleaning project)
+radio_engagement_10 <- readRDS("/Users/HansPeter/Dropbox/Statistics/UCTDataScience/Thesis/vehicle_cleaning/radio_engagement_10.rds")
 
 ## TV
 
 # check with 2012 names:
-check_tv_names_12 <- readRDS("names_tv_12.rds")
+# check_tv_names_12 <- readRDS("names_tv_12.rds")
 # names_tv_10 <- electr_10_labels %>%
 #         str_subset('Watched.+4\\sweeks') %>%
 #         str_replace('.+Watched\\s','') %>%
@@ -402,21 +412,21 @@ names(media_type_10) <- c("qn",
 media_type_10 <- media_type_10 %>%
         mutate(all = as.vector(newspapers + magazines + radio + tv + internet)) 
 
-media_type_10_simple <- data.frame(cbind(qn = print_10$qn,
-                                  rowSums(newspapers_engagement_10_simple),
-                                  rowSums(magazines_engagement_10_simple),
-                                  rowSums(radio_engagement_10),
-                                  rowSums(tv_engagement_10),
-                                  internet_engagement_10_simple))
-
-names(media_type_10_simple) <- c("qn",
-                          "newspapers",
-                          "magazines",
-                          "radio",
-                          "tv",
-                          "internet")
-media_type_10_simple <- media_type_10_simple %>%
-        mutate(all = as.vector(newspapers + magazines + radio + tv + internet)) 
+# media_type_10_simple <- data.frame(cbind(qn = print_10$qn,
+#                                   rowSums(newspapers_engagement_10_simple),
+#                                   rowSums(magazines_engagement_10_simple),
+#                                   rowSums(radio_engagement_10),
+#                                   rowSums(tv_engagement_10),
+#                                   internet_engagement_10_simple))
+# 
+# names(media_type_10_simple) <- c("qn",
+#                           "newspapers",
+#                           "magazines",
+#                           "radio",
+#                           "tv",
+#                           "internet")
+# media_type_10_simple <- media_type_10_simple %>%
+#         mutate(all = as.vector(newspapers + magazines + radio + tv + internet)) 
 
 
 # Level 2: Vehicles
@@ -427,22 +437,22 @@ media_vehicles_10 <- data.frame(cbind(qn = print_10$qn,
                                       tv_engagement_10,
                                       internet_engagement_10))
 
-media_vehicles_10_simple <- data.frame(cbind(qn = print_10$qn,
-                                      newspapers_engagement_10_simple,
-                                      magazines_engagement_10_simple,
-                                      radio_engagement_10,
-                                      tv_engagement_10,
-                                      internet_engagement_10_simple))
+# media_vehicles_10_simple <- data.frame(cbind(qn = print_10$qn,
+#                                       newspapers_engagement_10_simple,
+#                                       magazines_engagement_10_simple,
+#                                       radio_engagement_10,
+#                                       tv_engagement_10,
+#                                       internet_engagement_10_simple))
 
 saveRDS(media_type_10, 'media_type_10.rds')
-saveRDS(media_type_10_simple, 'media_type_10_simple.rds')
+# saveRDS(media_type_10_simple, 'media_type_10_simple.rds')
 saveRDS(media_vehicles_10, 'media_vehicles_10.rds')
-saveRDS(media_vehicles_10_simple, 'media_vehicles_10_simple.rds')
+# saveRDS(media_vehicles_10_simple, 'media_vehicles_10_simple.rds')
 
 media_type_10 <- readRDS("media_type_10.rds")
-media_type_10_simple <- readRDS("media_type_10_simple.rds")
+# media_type_10_simple <- readRDS("media_type_10_simple.rds")
 media_vehicles_10 <- readRDS("media_vehicles_10.rds")
-media_vehicles_10_simple <- readRDS("media_vehicles_10_simple.rds")
+# media_vehicles_10_simple <- readRDS("media_vehicles_10_simple.rds")
 
 ## 4th Demographics Set (see notes for descriptions)
 
@@ -605,29 +615,25 @@ set10 <- demographics_10 %>%
         left_join(media_vehicles_10) %>%
         filter(metro != 0)
 
-set10_simple <- demographics_10 %>%
-        left_join(media_type_10_simple) %>%
-        left_join(media_vehicles_10_simple) %>%
-        filter(metro != 0)
+# set10_simple <- demographics_10 %>%
+#         left_join(media_type_10_simple) %>%
+#         left_join(media_vehicles_10_simple) %>%
+#         filter(metro != 0)
 
 # get rid of zero variances:
 ind_10 <- nearZeroVar(set10[,16:ncol(set10)], saveMetrics = TRUE)
-ind_10_simple <- nearZeroVar(set10_simple[,16:ncol(set10_simple)], saveMetrics = TRUE)
-
 good_set <- set10[,16:ncol(set10)][,!ind_10$zeroVar]
-good_set_simple <- set10_simple[,16:ncol(set10_simple)][,!ind_10_simple$zeroVar]
-
 set10 <- data.frame(cbind(set10[,1:15], good_set))
-set10_simple <- data.frame(cbind(set10_simple[,1:15], good_set_simple))
+
 
 # scale media type and media vehicles
 set10[,16:ncol(set10)] <- scale(set10[,16:ncol(set10)])
-set10_simple[,ncol(set10_simple)] <- scale(set10_simple[,ncol(set10_simple)])
+# set10_simple[,ncol(set10_simple)] <- scale(set10_simple[,ncol(set10_simple)])
 
-# correct stupid anomoly
-set10_simple$internet_engagement_10_simple <- as.vector(set10_simple$internet_engagement_10_simple)
+# # correct stupid anomoly
+# set10_simple$internet_engagement_10_simple <- as.vector(set10_simple$internet_engagement_10_simple)
 
 # save them:
-saveRDS(set10, "set10.rds")
-saveRDS(set10_simple, "set10_simple.rds")
+saveRDS(set10, "set10.rds") # NB lifestages is NA...not available for 2010..
+# saveRDS(set10_simple, "set10_simple.rds")
 
