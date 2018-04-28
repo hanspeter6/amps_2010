@@ -18,7 +18,7 @@ library(gridExtra)
 library(ggplot2)
 
 # load datafiles 
-set10_min <- readRDS("/Users/HansPeter/Dropbox/Statistics/UCTDataScience/Thesis/amps_nationals/set10_min.rds")
+set10_nat <- readRDS("/Users/HansPeter/Dropbox/Statistics/UCTDataScience/Thesis/amps_nationals/set10_nat.rds")
 
 # LEVEL 2
 
@@ -39,10 +39,10 @@ set10_min <- readRDS("/Users/HansPeter/Dropbox/Statistics/UCTDataScience/Thesis/
 # nuSet10_JHB <- data.frame(cbind(set10_JHB[,1:20], good_jhb))
 
 #setting the ordered variables as scaled numerical:
-set10_min$age <- scale(as.numeric(set10_min$age))
-set10_min$edu <- scale(as.numeric(set10_min$edu))
-set10_min$hh_inc <- scale(as.numeric(set10_min$hh_inc))
-set10_min$lsm <- scale(as.numeric(set10_min$lsm))
+set10_nat$age <- scale(as.numeric(set10_nat$age))
+set10_nat$edu <- scale(as.numeric(set10_nat$edu))
+set10_nat$hh_inc <- scale(as.numeric(set10_nat$hh_inc))
+set10_nat$lsm <- scale(as.numeric(set10_nat$lsm))
 
 # naming the factors
 
@@ -50,34 +50,39 @@ set10_min$lsm <- scale(as.numeric(set10_min$lsm))
 # nuSet10_CT$cluster <- factor(nuSet10_CT$cluster,
 #                              levels = c(1,2,3,4),
 #                              labels = c("cluster1", "cluster2", "cluster3", "cluster4"))
-set10_min$sex <- factor(set10_min$sex,
+set10_nat$sex <- factor(set10_nat$sex,
                         levels = c(1,2),
                         labels = c("male", "female"))
-set10_min$race <- factor(set10_min$race,
+set10_nat$race <- factor(set10_nat$race,
                          levels = c(1,2,3,4),
                          labels = c("black", "coloured", "indian", "white"))
-set10_min$lifestages <- factor(set10_min$lifestages,
+set10_nat$lifestages <- factor(set10_nat$lifestages,
                                levels = c(1,2,3,4,5,6,7,8),
                                labels = c("at home singles", "young independent singles", "mature singles", "young couples", "mature couples", "young family", "single parent family", "mature family"))
-set10_min$mar_status <- factor(set10_min$mar_status,
+set10_nat$mar_status <- factor(set10_nat$mar_status,
                                levels = c(1,2,3,4,5),
                                labels = c("single", "married or living together", "widowed", "divorced", "separated"))
-set10_min$lifestyle <- factor(set10_min$lifestyle,
+set10_nat$lifestyle <- factor(set10_nat$lifestyle,
                               levels = c(1,2,3,4,5,6,7,8,9,10,11,12),
                               labels = c("none", "cell sophisticates", "sports", "gamers", "outdoors", "good living", "avid readers", "traditionalists","cell fundamentals", "homebodies", "studious", "showgoers"))
-set10_min$attitudes <- factor(set10_min$attitudes,
+set10_nat$attitudes <- factor(set10_nat$attitudes,
                               levels = c(1,2,3,4,5,6,7),
                               labels = c("none", "now generation", "nation builders", "distants survivors", "distants established", "rooted", "global citizens"))
 
 # focussing only on the variable I intend to use in this section:
-set10_min <- set10_min[,-c(1:2,8:12,14:21)]
+set10_nat <- set10_nat[,-c(1:2,8:12,14:21)]
+
+# # saving these objects:
+# saveRDS(set10_nat, "set10_nat.rds")
+# 
+# set10_nat <- readRDS("set10_nat.rds")
 
 ## Determine Number of Factors to Extract
-ev <- eigen(cor(set10_min[,7:ncol(set10_min)]))
-ap <- parallel(subject=nrow(set10_min[,7:ncol(set10_min)]),var=ncol(set10_min[,7:ncol(set10_min)]),
+ev <- eigen(cor(set10_nat[,7:ncol(set10_nat)]))
+ap <- parallel(subject=nrow(set10_nat[,7:ncol(set10_nat)]),var=ncol(set10_nat[,7:ncol(set10_nat)]),
                rep=100,cent=.10)
 nS <- nScree(x=ev$values, aparallel=ap$eigen$qevpea)
-jpeg("nScree_10_min")
+jpeg("nScree_10_nat")
 plotnScree(nS, main = "National") # optimal = 7
 dev.off()
 
@@ -86,36 +91,27 @@ npc <- 6
 
 # creating objects with supplementary variables (qualitative and quantitative) and active one defined:
 set.seed(56)
-pca_10_min <- PCA(set10_min,
+pca_10_nat <- PCA(set10_nat,
                   quanti.sup = c(1,3,4,6),
                   quali.sup = c(2,5),
                   ncp = npc,
                   graph = FALSE)
-saveRDS(pca_10_min, "pca_10_min.rds")
+saveRDS(pca_10_nat, "pca_10_nat.rds")
 
 
 # try pa method of factor analysis with oblimin rotation allowed....to try and get better estimation
 library(psych)
 set.seed(123)
-fact_10 <- fa(set10_min[7:ncol(set10_min)], nfactors = 6, fm = "pa") # default rotation oblimin, so does allow correlation between factors
+fact_10 <- fa(set10_nat[7:ncol(set10_nat)], nfactors = 6, fm = "pa") # default rotation oblimin, so does allow correlation between factors
 fact_10_loadings <- fact_10$loadings
 fact_10_scores <- fact_10$scores
 
-# scores with _08 as factor model
 fact_08 <- readRDS("/Users/HansPeter/Dropbox/Statistics/UCTDataScience/Thesis/amps_2008/fact_08.rds")
-fact_10_scores_model_08 <- predict(fact_08, data = set10_min[,7:ncol(set10_min)])
 
-# save for use in longitudinal stuff:
-saveRDS(fact_10_scores_model_08, "fact_10_scores_model_08.rds")
+fact_10_scores_model08 <- predict(fact_08, data = set10_min[,7:ncol(set08_min)])
 
-
-
-
-
-
-
-
-
+# rather try print as table for importing:
+capture.output(print(fact_10$loadings,digits=2,all=FALSE,cut=0.1,sort=TRUE,short=TRUE,lower=TRUE,signif=NULL), file = "/Users/HansPeter/Dropbox/Statistics/UCTDataScience/Thesis/amps_2008/loadings.csv", append = TRUE)
 
 
 # # try FactoInvestigate

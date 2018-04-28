@@ -19,7 +19,7 @@ library(ggplot2)
 
 #  read in datasets
 set10 <- readRDS("set10.rds")
-# set10_simple <- readRDS("set10_simple.rds")
+set10_simple <- readRDS("set10_simple.rds")
 
 # consider some correlations
 png('corTypePlot2010.png')
@@ -52,114 +52,126 @@ kmeans10 <- kmeans(set10[,c("newspapers","magazines","radio", "tv", "internet","
                    centers = 4,
                    nstart = 5,
                    iter.max = 100)
-# set.seed(56)
-# kmeans10_simple <- kmeans(set10_simple[,c("newspapers","magazines","radio", "tv", "internet", "all")],
-#                           centers = 4,
-#                           nstart = 20,
-#                           iter.max = 20)
-# 
-# table(kmeans10$cluster) #
+table(kmeans10$cluster)
+
+set.seed(123)
+kmeans10_simple <- kmeans(set10_simple[,c("newspapers","magazines","radio", "tv", "internet", "all")],
+                          centers = 4,
+                          nstart = 5,
+                          iter.max = 100)
+
+table(kmeans10_simple$cluster)
 
 # Comparing 2012 with 2010... will change colours to reflect meanin based on 2012:
 
-# green stays green: 2 -> 2
-# lilac stays lilac: 4 -> 4
-# red becomes blue: 1 -> 3
-#  blue becomes red: 3 -> 1
+# blue stays blue: 3 -> 3
+# lilac become green : 4 -> 2
+# red becomes lilac: 1 -> 4
+#  green becomes red: 2 -> 1
 
-kmeans10$cluster <- ifelse(kmeans10$cluster == 1, 8, kmeans10$cluster)
-kmeans10$cluster <- ifelse(kmeans10$cluster == 2, 7, kmeans10$cluster)
-kmeans10$cluster <- ifelse(kmeans10$cluster == 3, 6, kmeans10$cluster)
-kmeans10$cluster <- ifelse(kmeans10$cluster == 4, 9, kmeans10$cluster)
-kmeans10$cluster <- kmeans10$cluster - 5
+kmeans10_simple$cluster <- ifelse(kmeans10_simple$cluster == 1, 9, kmeans10_simple$cluster)
+kmeans10_simple$cluster <- ifelse(kmeans10_simple$cluster == 2, 6, kmeans10_simple$cluster)
+kmeans10_simple$cluster <- ifelse(kmeans10_simple$cluster == 3, 8, kmeans10_simple$cluster)
+kmeans10_simple$cluster <- ifelse(kmeans10_simple$cluster == 4, 7, kmeans10_simple$cluster)
+kmeans10_simple$cluster <- kmeans10_simple$cluster - 5
 
 # add cluster labels to the dataset
 set10c <- set10 %>%
         mutate(cluster = factor(kmeans10$cluster)) %>%
         dplyr::select(qn, pwgt, cluster, everything())
-# # 
-# set10c_simple <- set10_simple %>% ### sort out bloody internet thingy
-#         mutate(cluster = factor(kmeans10_simple$cluster)) %>%
-#         dplyr::select(qn, pwgt, cluster, everything())
-table(set10c$cluster)
+
+set10c_simple <- set10_simple %>% 
+        mutate(cluster = factor(kmeans10_simple$cluster)) %>%
+        dplyr::select(qn, pwgt, cluster, everything())
+
 saveRDS(set10c, "set10c.rds")
-# saveRDS(set10c_simple, "set10c_simple.rds")
+saveRDS(set10c_simple, "set10c_simple.rds")
 
 set10c <- readRDS("set10c.rds")
-# set10c_simple <- readRDS("set10c_simple.rds")
+set10c_simple <- readRDS("set10c_simple.rds")
 
 # some plots
 # boxplots of clusters and media types
-p1 <- ggplot(set10c, aes(cluster, all, fill = cluster)) +
+p1 <- ggplot(set10c_simple, aes(cluster, all, fill = cluster)) +
         geom_boxplot() +
         guides(fill = FALSE) +
         labs(title = "all")
-p2 <- ggplot(set10c, aes(cluster, newspapers, fill = cluster)) +
+p2 <- ggplot(set10c_simple, aes(cluster, newspapers, fill = cluster)) +
         geom_boxplot() +
         guides(fill = FALSE) +
         labs(title = "newspapers")
-p3 <- ggplot(set10c, aes(cluster, magazines, fill = cluster)) +
+p3 <- ggplot(set10c_simple, aes(cluster, magazines, fill = cluster)) +
         geom_boxplot() +
         guides(fill = FALSE) +
         labs(title = "magazines")
-p4 <- ggplot(set10c, aes(cluster, radio, fill = cluster)) +
+p4 <- ggplot(set10c_simple, aes(cluster, radio, fill = cluster)) +
         geom_boxplot() +
         guides(fill = FALSE) +
         labs(title = "radio")
-p5 <- ggplot(set10c, aes(cluster, tv, fill = cluster)) +
+p5 <- ggplot(set10c_simple, aes(cluster, tv, fill = cluster)) +
         geom_boxplot() +
         guides(fill = FALSE) +
         labs(title = "tv")
-p6 <- ggplot(set10c, aes(cluster, internet, fill = cluster)) +
+p6 <- ggplot(set10c_simple, aes(cluster, internet, fill = cluster)) +
         geom_boxplot() +
         guides(fill = FALSE) +
         labs(title = "internet")
 
-jpeg('typeBoxPlots_10.jpeg', quality = 100, type = "cairo")
-grid.arrange(p1, p2, p3, p4, p5,p6,  ncol=3, nrow = 2)
+jpeg('typeBoxPlots_10_simple.jpeg', quality = 100, type = "cairo")
+grid.arrange(p1, p2, p3, p4, p5, p6,  ncol=3, nrow = 2)
 dev.off()
 
 # try to make sense of demographics
-d1 <- ggplot(set10c, aes(race, cluster, fill = cluster)) +
+d1 <- ggplot(set10c_simple, aes(race, cluster, fill = cluster)) +
         geom_col() +
         labs(title = "race", y = "", x = "") +
         scale_x_discrete(labels=c("black", "coloured", "indian", "white"))
-d2 <- ggplot(set10c, aes(edu, cluster, fill = cluster)) +
+d2 <- ggplot(set10c_simple, aes(edu, cluster, fill = cluster)) +
         geom_col() +
         labs(title = "education", y = "", x = "") +
         scale_x_discrete(labels=c("<matric", "matric",">matric"))
-d3 <- ggplot(set10c, aes(age, cluster, fill = cluster)) +
+d3 <- ggplot(set10c_simple, aes(age, cluster, fill = cluster)) +
         geom_col() +
         labs(title = "age", y = "", x = "") +
         scale_x_discrete(labels=c("15-24","25-44", "45-54","55+"))
-d4 <- ggplot(set10c, aes(lsm, cluster, fill = cluster)) +
+d4 <- ggplot(set10c_simple, aes(lsm, cluster, fill = cluster)) +
         geom_col() +
         labs(title = "lsm", y = "", x = "") +
         scale_x_discrete(labels=c("1-2", "3-4", "5-6", "7-8", "9-10"))
 
-jpeg('typeDemogPlots1_10.jpeg', quality = 100, type = "cairo")
+jpeg('typeDemogPlots1_10_simple.jpeg', quality = 100, type = "cairo")
 grid.arrange(d1, d2, d3, d4, ncol=2, nrow = 2)
 dev.off()
 
-d5 <- ggplot(set10c, aes(sex, cluster, fill = cluster)) +
+d5 <- ggplot(set10c_simple, aes(sex, cluster, fill = cluster)) +
         geom_col() +
         labs(title = "gender", y = "", x = "") +
         scale_x_discrete(labels=c("male", "female"))
-d6 <- ggplot(set10c, aes(hh_inc, cluster, fill = cluster)) +
+d6 <- ggplot(set10c_simple, aes(hh_inc, cluster, fill = cluster)) +
         geom_col() +
         labs(title = "household income", y = "", x = "") +
         scale_x_discrete(labels=c("<5000","5000-10999","11000-19999",">=20000"))
-d7 <- ggplot(set10c, aes(lifestages, cluster, fill = cluster)) +
+d7 <- ggplot(set10c_simple, aes(lifestages, cluster, fill = cluster)) +
         geom_col() +
         labs(title = "lifestages", y = "", x = "")# +
 # scale_x_discrete(labels=c("<5000","5000-10999","11000-19999",">=20000"))
-d8 <- ggplot(set10c, aes(lifestyle, cluster, fill = cluster)) +
+d8 <- ggplot(set10c_simple, aes(lifestyle, cluster, fill = cluster)) +
         geom_col() +
         labs(title = "lifestyle", y = "", x = "")# +
 # scale_x_discrete(labels=c("<5000","5000-10999","11000-19999",">=20000"))
-jpeg('typeDemogPlots2_10.jpeg', quality = 100, type = "cairo")
+jpeg('typeDemogPlots2_10_simple.jpeg', quality = 100, type = "cairo")
 grid.arrange(d5, d6, d7, d8, ncol=2, nrow = 2)
 dev.off()
+
+
+
+
+
+
+
+
+
+
 
 
 
