@@ -117,7 +117,6 @@ saveRDS(magazines_engagement_10_all, "magazines_engagement_10_all.rds")
 saveRDS(newspapers_engagement_10_simple_all, "newspapers_engagement_10_simple_all.rds")
 saveRDS(magazines_engagement_10_simple_all, "magazines_engagement_10_simple_all.rds")
 
-
 ## CLEAN UP and reduce variables
 # for newspapers: include "Soccer Week", "Sondag" and "The Zimbabwean" as "other.news"
 other.news <- as.vector(apply(newspapers_engagement_10_all[,c(34,35,49)], 1, mean))
@@ -129,7 +128,6 @@ other.news_simple <- as.vector(apply(newspapers_engagement_10_simple_all[,c(34,3
 newspapers_engagement_10_simple <- newspapers_engagement_10_simple_all %>%
         mutate(other.news = other.news_simple)
 newspapers_engagement_10_simple <- newspapers_engagement_10_simple[,-c(34,35,49)]
-
 
 # for magazines - deal with it in vehicle_cleaning project
 magazines_engagement_10 <- readRDS("/Users/HansPeter/Dropbox/Statistics/UCTDataScience/Thesis/vehicle_cleaning/magazines_engagement_10.rds")
@@ -145,7 +143,6 @@ magazines_engagement_10 <- readRDS("magazines_engagement_10.rds")
 newspapers_engagement_10 <- readRDS("newspapers_engagement_10.rds")
 magazines_engagement_10_simple <- readRDS("magazines_engagement_10_simple.rds")
 newspapers_engagement_10_simple <- readRDS("newspapers_engagement_10_simple.rds")
-
 
 ## 2nd Electronic Media Set
 # RADIO
@@ -229,7 +226,9 @@ radio_engagement_10_all <- readRDS("radio_engagement_10_all.rds")
 
 # AFTER CLEANING (see vehicle cleaning project)
 radio_engagement_10 <- readRDS("/Users/HansPeter/Dropbox/Statistics/UCTDataScience/Thesis/vehicle_cleaning/radio_engagement_10.rds")
-
+#save in this workspace
+saveRDS(radio_engagement_10, "radio_engagement_10.rds")
+radio_engagement <- readRDS("radio_engagement_10.rds")
 ## TV
 
 # check with 2012 names:
@@ -405,11 +404,11 @@ internet_engagement_10_simple <- readRDS("internet_engagement_10_simple.rds")
 
 # Level 1: Type
 media_type_10 <- data.frame(cbind(qn = print_10$qn,
-                                  rowSums(newspapers_engagement_10),
-                                  rowSums(magazines_engagement_10),
-                                  rowSums(radio_engagement_10),
-                                  rowSums(tv_engagement_10),
-                                  rowSums(internet_engagement_10)))
+                                  rowSums(scale(newspapers_engagement_10)),
+                                  rowSums(scale(magazines_engagement_10)),
+                                  rowSums(scale(radio_engagement_10)),
+                                  rowSums(scale(tv_engagement_10)),
+                                  rowSums(scale(internet_engagement_10))))
 names(media_type_10) <- c("qn",
                           "newspapers",
                           "magazines",
@@ -420,11 +419,11 @@ media_type_10 <- media_type_10 %>%
         mutate(all = as.vector(newspapers + magazines + radio + tv + internet)) 
 
 media_type_10_simple <- data.frame(cbind(qn = print_10$qn,
-                                  rowSums(newspapers_engagement_10_simple),
-                                  rowSums(magazines_engagement_10_simple),
-                                  rowSums(radio_engagement_10),
-                                  rowSums(tv_engagement_10),
-                                  internet_engagement_10_simple))
+                                  rowSums(scale(newspapers_engagement_10_simple)),
+                                  rowSums(scale(magazines_engagement_10_simple)),
+                                  rowSums(scale(radio_engagement_10)),
+                                  rowSums(scale(tv_engagement_10)),
+                                  scale(internet_engagement_10_simple)))
 
 names(media_type_10_simple) <- c("qn",
                           "newspapers",
@@ -619,13 +618,13 @@ demographics_10 <- readRDS("demographics_10.rds")
 # #create single dataset minus non metropolitans
 set10 <- demographics_10 %>%
         left_join(media_type_10) %>%
-        left_join(media_vehicles_10) %>%
-        filter(metro != 0)
+        left_join(media_vehicles_10)
+#%>%filter(metro != 0)
 
 set10_simple <- demographics_10 %>%
         left_join(media_type_10_simple) %>%
-        left_join(media_vehicles_10_simple) %>%
-        filter(metro != 0)
+        left_join(media_vehicles_10_simple)
+#%>%filter(metro != 0)
 
 # get rid of zero variances:
 ind_10 <- nearZeroVar(set10[,16:ncol(set10)], saveMetrics = TRUE)
