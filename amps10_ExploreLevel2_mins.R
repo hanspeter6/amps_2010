@@ -1,7 +1,7 @@
 # libraries
 library(nFactors)
 library(psych)
-library(FactoMineR)
+# library(FactoMineR)
 
 # load datafiles 
 set10_min <- readRDS("/Users/HansPeter/Dropbox/Statistics/UCTDataScience/Thesis/amps_nationals/set10_min.rds")
@@ -11,14 +11,14 @@ set10_min <- readRDS("/Users/HansPeter/Dropbox/Statistics/UCTDataScience/Thesis/
 # Subsetting only on the variable I intend to use in this section:
 set10_min <- set10_min[,-c(1:2,8:12,14:21)]
 
-# ## Determine Number of Factors to Extract
-# ev <- eigen(cor(set10_min[,7:ncol(set10_min)]))
-# ap <- parallel(subject=nrow(set10_min[,7:ncol(set10_min)]),var=ncol(set10_min[,7:ncol(set10_min)]),
-#                rep=100,cent=.02)
-# nS <- nScree(x=ev$values, aparallel=ap$eigen$qevpea)
-# jpeg("nScree_10_min")
-# plotnScree(nS, main = "National") # optimal = 6
-# dev.off()
+## Determine Number of Factors to Extract
+ev <- eigen(cor(set10_min[,7:ncol(set10_min)]))
+ap <- parallel(subject=nrow(set10_min[,7:ncol(set10_min)]),var=ncol(set10_min[,7:ncol(set10_min)]),
+               rep=100,cent=.02)
+nS <- nScree(x=ev$values, aparallel=ap$eigen$qevpea)
+jpeg("nScree_10_min")
+plotnScree(nS, main = "National Minimum Set: 2010") # optimal = 6
+dev.off()
 # 
 # # will set them at six for both Jhb and CT for now
 # npc <- 6
@@ -46,3 +46,6 @@ saveRDS(fact_10_loadings, "fact_10_loadings.rds")
 
 # save scores:
 saveRDS(fact_10_scores, "fact_10_scores.rds")
+
+
+write.csv(round(loadings(fact_10, sort = TRUE), 2), file = "loadings_min_10.csv")

@@ -148,7 +148,7 @@ dev.off()
 
 # 1st create a subset to ensure easier running
 set.seed(56)
-sub10 <- set10c[sample(nrow(set10c), size = 1000),]
+sub10 <- set10c[sample(nrow(set10c), size = 3000),]
 
 # distance matrix and MDS
 sub10_dist <- dist(sub10[,c("newspapers","magazines","radio", "tv", "internet", "all")])
